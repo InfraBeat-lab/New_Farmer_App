@@ -1,0 +1,1 @@
+ D:\\FARMER2.0\\New_Farmer_App\\build\\0573148bc405d7c3c39f2f8793152416\\dart_build_result.json:  D:\\FARMER2.0\\New_Farmer_App\\pubspec.yaml D:\\PoultryOS_Farmer_App\\PoultryOS_Farmer_App\\.dart_tool\\package_config.json D:\\flutter_windows_3.38.9-stable\\flutter\\bin\\cache\\dart-sdk\\version d:\\poultryos_farmer_app\\poultryos_farmer_app\\.dart_tool\\package_config.json

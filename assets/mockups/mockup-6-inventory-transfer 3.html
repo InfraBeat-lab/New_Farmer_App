@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Transfer - KKCK Mobile</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #E80E15 0%, #C20B12 100%);
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .time {
+            font-weight: 600;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .app-content {
+            background: white;
+            height: calc(100% - 40px);
+            border-radius: 30px 30px 0 0;
+            overflow-y: auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #E80E15 0%, #C20B12 100%);
+            padding: 24px 20px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 13px;
+            opacity: 0.95;
+        }
+
+        .back-btn {
+            margin-bottom: 12px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .content-wrapper {
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-field {
+            margin-bottom: 12px;
+        }
+
+        .form-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #fa709a;
+            box-shadow: 0 0 0 3px rgba(250, 112, 154, 0.1);
+        }
+
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .warehouse-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .warehouse-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .warehouse-label {
+            font-size: 11px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .warehouse-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .warehouse-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .data-table {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 0.6fr 1.5fr 1.2fr 1fr 1fr 1fr 0.8fr 0.8fr;
+            gap: 6px;
+            padding: 8px 6px;
+            font-size: 9px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            min-width: 600px;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 0.6fr 1.5fr 1.2fr 1fr 1fr 1fr 0.8fr 0.8fr;
+            gap: 6px;
+            padding: 10px 6px;
+            background: white;
+            border-radius: 8px;
+            margin-top: 6px;
+            font-size: 11px;
+            align-items: center;
+            min-width: 600px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e5e5;
+            position: sticky;
+            bottom: 0;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #E80E15 0%, #C20B12 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e5e5;
+            color: #333;
+        }
+
+        .btn-tertiary {
+            background: #E80E15;
+            color: white;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone-frame">
+        <div class="notch"></div>
+        <div class="screen">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="status-icons">
+                    <span>📶</span>
+                    <span>📡</span>
+                    <span>🔋</span>
+                </div>
+            </div>
+            <div class="app-content">
+                <div class="header">
+                    <div class="back-btn">←</div>
+                    <h1>Eggs Transfer to Setter</h1>
+                    <div class="header-info">
+                       
+                        <span>10/02/2026</span>
+                    </div>
+                </div>
+                <div class="content-wrapper">
+                   
+
+                    <div class="section">
+                        <div class="section-title">Warehouse Information</div>
+                        <div class="warehouse-grid">
+                            <div class="warehouse-card">
+                                <div class="warehouse-icon">📦</div>
+                                <div class="warehouse-label">From Warehouse</div>
+                                <div class="warehouse-value">CK</div>
+                            </div>
+                            <div class="warehouse-card">
+                                <div class="warehouse-icon">🏭</div>
+                                <div class="warehouse-label">To Warehouse</div>
+                                <div class="warehouse-value">01</div>
+                            </div>
+                        </div>
+                        <div class="form-field full">
+                            <label class="form-label">To Bin Location</label>
+                            <input type="text" class="form-input" placeholder="Magaon">
+                        </div>
+                    </div>
+
+
+                    <div class="section">
+                        <div class="section-title">Transfer Contents</div>
+                        <div class="data-table">
+                            <div class="table-scroll">
+                                <div class="table-header">
+                                    <div>#</div>
+                                    <div>Item No.</div>
+                                    <div>Description</div>
+                                    <div>From WH</div>
+                                    <div>From Bin</div>
+                                    <div>To WH</div>
+                                    <div>Qty</div>
+                                   
+                                </div>
+                                <div class="table-row">
+                                    <div style="font-weight: 700;">1</div>
+                                    <div>-</div>
+                                    <div>-</div>
+                                    <div>-</div>
+                                    <div>-</div>
+                                    <div style="font-weight: 700;">01</div>
+                                    <div>-</div>
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary">Cancel</button>
+                    <button class="btn btn-tertiary">Copy From</button>
+                    <button class="btn btn-primary">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

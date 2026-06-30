@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW 2017 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1.70666in" height="1.70666in" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 1707 1707"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <font id="FontID0" horiz-adv-x="684" font-variant="normal" style="fill-rule:nonzero" font-style="normal" font-weight="400">
+	<font-face 
+		font-family="Rupee Foradian">
+		<font-face-src>
+			<font-face-name name="Rupee Foradian"/>
+		</font-face-src>
+	</font-face>
+   <missing-glyph><path d="M0 0z"/></missing-glyph>
+   <glyph unicode="`" horiz-adv-x="500" d="M37.666 729.002l469.667 0 0 -1.00197c-27.665,-42.6646 -43.3326,-65.3347 -46.8338,-68.3331l-125.498 0c17.1649,-20.1671 29.001,-44.8336 35.1667,-73.6657l133.664 0c1.66996,-0.333991 2.50306,-1.00197 2.50306,-2.0002 -30.0029,-45.0025 -45.1676,-67.3349 -45.8356,-67.3349l-86.9991 0c-1.83132,-23.1655 -12.9994,-50.9993 -33.1665,-83.4978 -26.6668,-33.0013 -52.1664,-54.3355 -76.6679,-64.0025 -45.4979,-21.8333 -89.1644,-32.6636 -130.831,-32.6636l0 -1.00197c0,-3.33241 10.1661,-16.8347 30.6672,-40.4993l231.996 -279.832 0 -13.1683c0,-1.33221 -0.833102,-2.0002 -2.49931,-2.0002l-101.999 0c-183.5,213.833 -275.333,321.333 -275.333,322.332l0 64.8356 0.998221 2.49931c16.1667,-2.33419 35.3355,-3.50128 56.9999,-3.50128 103.001,0 166.834,33.5005 192,100.167 3.83527,9.83586 5.83547,19.8331 5.83547,30.3332l-279.333 0c-1.33597,0 -2.0002,0.667983 -2.0002,1.83508 30.9974,44.9988 46.8338,67.5 47.4981,67.5l221.669 0 0 0.998221c-12.6692,25.6685 -37.3357,45.6667 -73.8346,60.0021 -25.9988,8.49989 -49.502,12.6654 -70.3333,12.6654l-124.001 0 0 2.49931c29.9992,44.4997 45.5016,66.8358 46.4998,66.8358z"/>
+  </font>
+  <style type="text/css">
+   <![CDATA[
+    @font-face { font-family:"Rupee Foradian";font-variant:normal;font-style:normal;font-weight:normal;src:url("#FontID0") format(svg)}
+    .fil0 {fill:none}
+    .fil2 {fill:#FEFEFE}
+    .fil1 {fill:#FF6600}
+    .fil3 {fill:#FEFEFE;fill-rule:nonzero}
+    .fil4 {fill:#FF6600;fill-rule:nonzero}
+    .fnt0 {font-weight:normal;font-size:1049.11px;font-family:'Rupee Foradian'}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <rect class="fil0" width="1707" height="1707"/>
+  <path class="fil1" d="M772 417c120,-101 200,-328 151,-338 -66,-13 -208,45 -277,55 -98,12 -204,-106 -264,-40 -49,53 35,247 165,332 -389,191 -936,1151 18,1221 1320,96 659,-1043 206,-1229z"/>
+  <text x="427" y="1480"  class="fil2 fnt0">`</text>
+  <path class="fil3" d="M1193 394l0 713 -209 0 318 460 318 -460 -209 0 0 -713 -218 0zm0 356m-104 356m54 230m318 0m54 -230m-104 -356m-109 -356"/>
+  <path class="fil4" d="M1221 422l0 713 -184 0 265 384 265 -384 -184 0 0 -713 -162 0zm-56 657l0 -713 273 0 0 713 234 0 -370 537 -370 -537 234 0z"/>
+ </g>
+</svg>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW X7 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="512px" height="512px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 512 512"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ enable-background="new 0 0 650 900"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:cc="http://creativecommons.org/ns#"
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:svg="http://www.w3.org/2000/svg"
+ xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+ xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil0 {fill:none}
+    .fil1 {fill:#FE6700}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <rect class="fil0" width="512" height="512"/>
+  <g id="noun_757321_cc.svg">
+   <g>
+    <path class="fil1" d="M32 42c-9,0 -16,7 -16,16 0,9 7,16 16,16l51 0 55 260c2,10 8,18 17,18l267 0c8,0 16,-7 16,-16 0,-8 -8,-16 -16,-16l-254 0 -7 -32 282 0c7,0 14,-5 16,-12l37 -161c2,-9 -6,-19 -15,-19l-361 0 -9 -41c-1,-7 -8,-13 -15,-13l-64 0zm95 86l97 0 0 48 -87 0 -10 -48zm129 0l75 0 0 48 -75 0 0 -48zm107 0l97 0 -11 48 -86 0 0 -48zm-219 80l80 0 0 48 -70 0 -10 -48zm112 0l75 0 0 48 -75 0 0 -48zm107 0l79 0 -12 48 -67 0 0 -48zm-150 155c-29,0 -53,24 -53,53 0,30 24,54 53,54 30,0 54,-24 54,-54 0,-29 -24,-53 -54,-53zm150 0c-29,0 -53,24 -53,53 0,30 24,54 53,54 29,0 53,-24 53,-54 0,-29 -24,-53 -53,-53zm-150 32c12,0 22,9 22,21 0,12 -10,22 -22,22 -12,0 -21,-10 -21,-22 0,-12 9,-21 21,-21zm150 0c12,0 21,9 21,21 0,12 -9,22 -21,22 -12,0 -21,-10 -21,-22 0,-12 9,-21 21,-21z" display="inline"/>
+   </g>
+  </g>
+ </g>
+</svg>

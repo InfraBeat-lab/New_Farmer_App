@@ -126,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _farmsCtrl.text = LocalStorageService.getString('farms') ?? '';
     _shedsCtrl.text = LocalStorageService.getString('sheds') ?? '';
     _passwordCtrl.text = LocalStorageService.getString('password') ?? '';
-    _selectedRole = LocalStorageService.getString('role') ?? 'Admin';
+    _selectedRole = 'Admin';
     final savedCountry = LocalStorageService.getString('country') ?? 'India';
     if (_countries.contains(savedCountry)) {
       _selectedCountry = savedCountry;
@@ -286,14 +286,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _gridRow(Widget left, Widget right) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _gridRow(BuildContext context, Widget left, Widget right) {
+    final double width = MediaQuery.of(context).size.width;
+    if (width < 600) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: left),
-          const SizedBox(width: 14),
-          Expanded(child: right),
+          left,
+          const SizedBox(height: 14),
+          right,
         ],
       );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 14),
+        Expanded(child: right),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -345,6 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // ── IDENTITY ──────────────────────────────
                     _sectionLabel('IDENTITY'),
                     _gridRow(
+                      context,
                       _field(ctrl: _farmerIdCtrl, label: 'Farmer ID', icon: Icons.vpn_key_outlined, disabled: true),
                       _field(
                         ctrl: _fullNameCtrl,
@@ -354,6 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 14),
                     _gridRow(
+                      context,
                       _field(
                         ctrl: _mobileCtrl,
                         label: 'Mobile Number',
@@ -383,6 +398,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 14),
                     _gridRow(
+                      context,
                       _field(
                         ctrl: _zipCtrl,
                         label: 'Zip Code',
@@ -395,7 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       // Role dropdown styled like a field
                       Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                         DropdownButtonFormField<String>(
-                          initialValue: _selectedRole,
+                          value: _selectedRole,
                           decoration: const InputDecoration(
                             labelText: 'Role',
                             prefixIcon: Icon(Icons.admin_panel_settings_outlined, color: AppTheme.primaryRed),
@@ -403,8 +419,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           items: const [
                             DropdownMenuItem(value: 'Admin', child: Text('Admin')),
-                            DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
-                            DropdownMenuItem(value: 'Farmer', child: Text('Farmer')),
                           ],
                           onChanged: (v) { if (v != null) setState(() => _selectedRole = v); },
                         ),
@@ -432,6 +446,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _field(ctrl: _addressCtrl, label: 'Address', icon: Icons.location_on_outlined, maxLines: 2),
                     const SizedBox(height: 14),
                     _gridRow(
+                      context,
                       // Country dropdown
                       DropdownButtonFormField<String>(
                         // ignore: deprecated_member_use
@@ -459,6 +474,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // ── FARM INFO ────────────────────────────
                     _sectionLabel('FARM DETAILS'),
                     _gridRow(
+                      context,
                       _field(
                         ctrl: _farmsCtrl,
                         label: 'Farms',

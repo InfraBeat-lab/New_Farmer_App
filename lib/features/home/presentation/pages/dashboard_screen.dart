@@ -154,13 +154,13 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   final List<FarmerUser> _users = [
     FarmerUser(
-      name: 'Ramesh Patel (Admin)',
+      name: 'Sagar Godbole (Admin)',
       mobile: '9876543210',
-      email: 'ramesh.farms@gmail.com',
+      email: 'sagar@logicaldna.com',
       password: 'adminpassword',
-      role: 'Farmer',
+      role: 'Admin',
       farmerId: '1',
-      userCode: 'RP-1001',
+      userCode: 'SG-1001',
       isAdmin: true,
     )
   ];
@@ -192,11 +192,12 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   void _loadUserRoleAndName() {
     final email = LocalStorageService.getString('email') ?? '';
-    final userCode = LocalStorageService.getString('user_code') ?? 'RP-1001';
-    final displayName = LocalStorageService.getString('display_name') ?? 'Ramesh Patel';
+    final userCode = LocalStorageService.getString('user_code') ?? 'SG-1001';
+    final displayName = LocalStorageService.getString('display_name') ?? 'Sagar Godbole';
+    final farmerId = LocalStorageService.getString('farmer_id') ?? '1';
 
     setState(() {
-      _isAdmin = (email == 'ramesh.farms@gmail.com');
+      _isAdmin = (email == 'sagar@logicaldna.com');
       _userCode = userCode;
       _displayName = displayName;
     });
@@ -211,6 +212,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           _users[index].email = email;
           _users[index].name = displayName;
           _users[index].userCode = userCode;
+          _users[index].farmerId = farmerId;
         });
         _saveUsersToStorage();
       }
@@ -376,11 +378,12 @@ class _DashboardScreenState extends State<DashboardScreen>
         }
       });
       _saveBalancesToStorage();
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Purchased ${result.length} item(s)! User & Batch tabs unlocked.'),
-          backgroundColor: AppTheme.success,
+          backgroundColor: AppTheme.primaryRed,
           duration: const Duration(seconds: 2),
         ),
       );
@@ -394,7 +397,8 @@ class _DashboardScreenState extends State<DashboardScreen>
     final mobileCtrl = TextEditingController(text: user?.mobile ?? '');
     final emailCtrl = TextEditingController(text: user?.email ?? '');
     final passwordCtrl = TextEditingController(text: user?.password ?? '');
-    final farmerIdCtrl = TextEditingController(text: user?.farmerId ?? '1');
+    final loggedInFarmerId = LocalStorageService.getString('farmer_id') ?? '1';
+    final farmerIdCtrl = TextEditingController(text: user?.farmerId ?? loggedInFarmerId);
     final userCodeCtrl = TextEditingController(text: user?.userCode ?? '');
     String selectedRole = user?.role ?? 'Supervisor';
     final formKey = GlobalKey<FormState>();
@@ -475,11 +479,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                       const Text('Role', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.grey700, fontSize: 13)),
                       const SizedBox(height: 6),
                       DropdownButtonFormField<String>(
-                        initialValue: selectedRole,
+                        value: selectedRole,
                         decoration: const InputDecoration(prefixIcon: Icon(Icons.admin_panel_settings_outlined), contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
                         items: const [
                           DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
                           DropdownMenuItem(value: 'Farmer', child: Text('Farmer')),
+                          DropdownMenuItem(value: 'Admin', child: Text('Admin')),
                         ],
                         onChanged: (v) { if (v != null) selectedRole = v; },
                       ),
@@ -636,7 +641,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     const Text('Module', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.grey700, fontSize: 13)),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      initialValue: selectedModule,
+                      value: selectedModule,
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.category_outlined),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -730,7 +735,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                               child: const Text('No farmers found. Please create a user first.', style: TextStyle(color: Colors.orange, fontSize: 12)),
                             )
                           : DropdownButtonFormField<String>(
-                              initialValue: linkedFarmerCode,
+                              value: linkedFarmerCode,
                               hint: const Text('Choose a farmer'),
                               decoration: const InputDecoration(
                                 prefixIcon: Icon(Icons.person_outlined),
@@ -774,7 +779,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     const Text('Breed Name', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.grey700, fontSize: 13)),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      initialValue: breedName,
+                      value: breedName,
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.cruelty_free_outlined),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -978,7 +983,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           tooltip: 'Account Menu',
           onSelected: (val) {
             if (val == 'profile') {
-              context.push('/profile');
+              context.push('/profile').then((_) => _loadUserRoleAndName());
             } else if (val == 'logout') {
               showDialog(
                 context: context,
@@ -1073,7 +1078,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
-            color: const Color(0xFF0D8B60),
+            decoration: const BoxDecoration(
+              gradient: AppTheme.primaryGradient,
+            ),
             child: TabBar(
               controller: _tabController,
               indicatorColor: Colors.white,
@@ -1108,7 +1115,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       floatingActionButton: _recharged
           ? (_tabController.index == 1
               ? FloatingActionButton(
-                  backgroundColor: const Color(0xFF0D8B60),
+                  backgroundColor: AppTheme.primaryRed,
                   foregroundColor: Colors.white,
                   tooltip: 'Add User',
                   onPressed: () => _showUserForm(),
@@ -1228,17 +1235,45 @@ class _DashboardScreenState extends State<DashboardScreen>
           itemBuilder: (context, index) {
             final user = _users[index];
             final initials = user.name.split(' ').take(2).map((w) => w.isNotEmpty ? w[0] : '').join('').toUpperCase();
-            return Card(
-              elevation: 1,
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            final roleColor = user.isAdmin
+                ? AppTheme.primaryRed
+                : (user.role == 'Supervisor' ? Colors.blue : Colors.green);
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border(
+                  left: BorderSide(color: roleColor, width: 4),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.all(16),
                 child: Row(children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: AppTheme.primaryRed.withValues(alpha: 0.1),
-                    child: Text(initials.isNotEmpty ? initials : 'U', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryRed)),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [roleColor.withValues(alpha: 0.18), roleColor.withValues(alpha: 0.04)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        initials.isNotEmpty ? initials : 'U',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: roleColor, fontSize: 16),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1248,10 +1283,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: (user.role == 'Farmer' ? Colors.green : Colors.blue).withValues(alpha: 0.1),
+                          color: roleColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(user.role, style: TextStyle(color: user.role == 'Farmer' ? Colors.green : Colors.blue, fontSize: 10, fontWeight: FontWeight.bold)),
+                        child: Text(user.role, style: TextStyle(color: roleColor, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                     ]),
                     const SizedBox(height: 4),
@@ -1480,7 +1515,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           tooltip: 'Account Menu',
           onSelected: (val) {
             if (val == 'profile') {
-              context.push('/profile');
+              context.push('/profile').then((_) => _loadUserRoleAndName());
             } else if (val == 'logout') {
               showDialog(
                 context: context,
@@ -1972,6 +2007,12 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
   bool _isInterstate = false;
   final double _pricePerBatch = 500.0;
 
+  String? _appliedCoupon;
+  double _discountAmount = 0.0;
+  final _couponCtrl = TextEditingController();
+  String? _couponError;
+  String? _couponSuccess;
+
   @override
   void initState() {
     super.initState();
@@ -1982,7 +2023,99 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
   @override
   void dispose() {
     _countCtrl.dispose();
+    _couponCtrl.dispose();
     super.dispose();
+  }
+
+  void _applyCoupon(String code) {
+    code = code.trim().toUpperCase();
+    double discount = 0.0;
+    String? successMsg;
+    String? errorMsg;
+
+    if (code == 'FARMER50') {
+      discount = _subtotal * 0.5;
+      successMsg = 'FARMER50 applied! 50% discount';
+    } else if (code == 'WELCOME10') {
+      discount = _subtotal * 0.1;
+      successMsg = 'WELCOME10 applied! 10% discount';
+    } else if (code == 'FREESHED') {
+      discount = min(500.0, _subtotal);
+      successMsg = 'FREESHED applied! Flat ₹500 discount';
+    } else if (code == 'POULTRYOS') {
+      discount = _subtotal * 0.2;
+      successMsg = 'POULTRYOS applied! 20% discount';
+    } else {
+      errorMsg = 'Invalid Coupon Code';
+    }
+
+    setState(() {
+      if (errorMsg != null) {
+        _couponError = errorMsg;
+        _couponSuccess = null;
+        _appliedCoupon = null;
+        _discountAmount = 0.0;
+      } else {
+        _couponError = null;
+        _couponSuccess = successMsg;
+        _appliedCoupon = code;
+        _discountAmount = discount;
+        _couponCtrl.text = code;
+      }
+    });
+  }
+
+  void _removeCoupon() {
+    setState(() {
+      _appliedCoupon = null;
+      _discountAmount = 0.0;
+      _couponCtrl.clear();
+      _couponError = null;
+      _couponSuccess = null;
+    });
+  }
+
+  Widget _buildCouponCard(String code, String label, String desc) {
+    final isSelected = _appliedCoupon == code;
+    return GestureDetector(
+      onTap: () => _applyCoupon(code),
+      child: Container(
+        width: 170,
+        margin: const EdgeInsets.only(right: 10, bottom: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.successLight.withValues(alpha: 0.5) : Colors.white,
+          border: Border.all(
+            color: isSelected ? AppTheme.success : AppTheme.grey300,
+            width: isSelected ? 1.5 : 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.card_giftcard, size: 12, color: AppTheme.primaryRed),
+                const SizedBox(width: 4),
+                Text(
+                  code,
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryRed),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              desc,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 9, color: AppTheme.grey500),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   double get _subtotal => _cart.fold(0.0, (s, i) => s + i.subtotal);
@@ -2024,7 +2157,7 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
         const Text('Select Module', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.grey700)),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          initialValue: _selectedModule,
+          value: _selectedModule,
           decoration: const InputDecoration(prefixIcon: Icon(Icons.category_outlined, color: AppTheme.primaryRed), contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
           items: const [
             DropdownMenuItem(value: 'Broiler', child: Text('Broiler')),
@@ -2060,7 +2193,7 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
           },
           icon: const Icon(Icons.add_shopping_cart),
           label: const Text('Add to Cart'),
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D8B60), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
         ),
         if (_cart.isNotEmpty) ...[
           const SizedBox(height: 10),
@@ -2073,7 +2206,7 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
   Widget _buildCart() {
     return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Row(children: [const Icon(Icons.shopping_cart, color: Color(0xFF0D8B60)), const SizedBox(width: 8), Text('Cart (${_cart.length})', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.grey800))]),
+        Row(children: [const Icon(Icons.shopping_cart, color: AppTheme.primaryRed), const SizedBox(width: 8), Text('Cart (${_cart.length})', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.grey800))]),
         IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
       ]),
       const Divider(height: 12),
@@ -2109,11 +2242,11 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
         const SizedBox(height: 12),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           const Text('Subtotal:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-          Text('₹${_subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0D8B60))),
+          Text('₹${_subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryRed)),
         ]),
         const SizedBox(height: 16),
         Row(children: [
-          Expanded(child: OutlinedButton.icon(onPressed: () => setState(() => _step = 0), icon: const Icon(Icons.add), label: const Text('Add More'), style: OutlinedButton.styleFrom(side: const BorderSide(color: Color(0xFF0D8B60)), foregroundColor: const Color(0xFF0D8B60), padding: const EdgeInsets.symmetric(vertical: 14)))),
+          Expanded(child: OutlinedButton.icon(onPressed: () => setState(() => _step = 0), icon: const Icon(Icons.add), label: const Text('Add More'), style: OutlinedButton.styleFrom(side: const BorderSide(color: AppTheme.primaryRed), foregroundColor: AppTheme.primaryRed, padding: const EdgeInsets.symmetric(vertical: 14)))),
           const SizedBox(width: 12),
           Expanded(child: ElevatedButton.icon(onPressed: () => setState(() => _step = 2), icon: const Icon(Icons.receipt_long), label: const Text('Checkout'), style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14)))),
         ]),
@@ -2122,14 +2255,15 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
   }
 
   Widget _buildInvoice() {
-    final cgst = _isInterstate ? 0.0 : _subtotal * 0.09;
-    final sgst = _isInterstate ? 0.0 : _subtotal * 0.09;
-    final igst = _isInterstate ? _subtotal * 0.18 : 0.0;
-    final total = _subtotal + cgst + sgst + igst;
+    final discountedSubtotal = max(0.0, _subtotal - _discountAmount);
+    final cgst = _isInterstate ? 0.0 : discountedSubtotal * 0.09;
+    final sgst = _isInterstate ? 0.0 : discountedSubtotal * 0.09;
+    final igst = _isInterstate ? discountedSubtotal * 0.18 : 0.0;
+    final total = discountedSubtotal + cgst + sgst + igst;
 
     return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        const Row(children: [Icon(Icons.receipt_long, color: Color(0xFF0D8B60)), SizedBox(width: 8), Text('Invoice', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.grey800))]),
+        const Row(children: [Icon(Icons.receipt_long, color: AppTheme.primaryRed), SizedBox(width: 8), Text('Invoice', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.grey800))]),
         IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
       ]),
       const Divider(height: 12),
@@ -2137,12 +2271,104 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
         title: const Text('Inter-state (IGST)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
         subtitle: const Text('IGST 18% instead of CGST+SGST 9%+9%', style: TextStyle(fontSize: 11)),
         value: _isInterstate,
-        activeThumbColor: const Color(0xFF0D8B60),
-        activeTrackColor: const Color(0xFF0D8B60).withValues(alpha: 0.5),
+        activeThumbColor: AppTheme.primaryRed,
+        activeTrackColor: AppTheme.primaryRed.withValues(alpha: 0.5),
         contentPadding: EdgeInsets.zero,
         onChanged: (v) => setState(() => _isInterstate = v),
       ),
       const SizedBox(height: 8),
+
+      // --- Offers & Coupons Section (Zomato/Swiggy style) ---
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              Icon(Icons.local_offer_outlined, color: AppTheme.primaryRed, size: 16),
+              SizedBox(width: 6),
+              Text(
+                'Offers & Coupons',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.grey800),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 42,
+                  child: TextFormField(
+                    controller: _couponCtrl,
+                    style: const TextStyle(fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'Enter coupon code',
+                      hintStyle: const TextStyle(fontSize: 12),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      prefixIcon: const Icon(Icons.abc, color: AppTheme.grey500),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: AppTheme.grey300), borderRadius: BorderRadius.circular(8)),
+                      focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: AppTheme.primaryRed), borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 42,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_appliedCoupon != null) {
+                      _removeCoupon();
+                    } else {
+                      if (_couponCtrl.text.isNotEmpty) {
+                        _applyCoupon(_couponCtrl.text);
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _appliedCoupon != null ? Colors.grey[700] : AppTheme.primaryRed,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: Text(_appliedCoupon != null ? 'Remove' : 'Apply', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ),
+            ],
+          ),
+          if (_couponError != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _couponError!,
+              style: const TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+          ],
+          if (_couponSuccess != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _couponSuccess!,
+              style: const TextStyle(color: AppTheme.successDark, fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+          ],
+          const SizedBox(height: 8),
+          // Horizontal coupon list
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                _buildCouponCard('FARMER50', '50% OFF', 'Save 50% on all licenses'),
+                _buildCouponCard('FREESHED', '₹500 OFF', 'Flat ₹500 discount'),
+                _buildCouponCard('POULTRYOS', '20% OFF', 'Flat 20% discount on total cost'),
+                _buildCouponCard('WELCOME10', '10% OFF', 'Flat 10% discount for first recharge'),
+              ],
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 14),
+
       Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(color: const Color(0xFFF9F9F9), borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.grey200)),
@@ -2158,6 +2384,8 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
           )),
           const Divider(height: 14),
           _invoiceRow('Subtotal', '₹${_subtotal.toStringAsFixed(2)}'),
+          if (_appliedCoupon != null)
+            _invoiceRow('Coupon Discount ($_appliedCoupon)', '-₹${_discountAmount.toStringAsFixed(2)}', isDiscount: true),
           _invoiceRow('CGST (9%)', '₹${cgst.toStringAsFixed(2)}', dim: _isInterstate),
           _invoiceRow('SGST (9%)', '₹${sgst.toStringAsFixed(2)}', dim: _isInterstate),
           _invoiceRow('IGST (18%)', '₹${igst.toStringAsFixed(2)}', dim: !_isInterstate),
@@ -2177,27 +2405,36 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
     ]);
   }
 
-  Widget _invoiceRow(String label, String value, {bool dim = false}) {
+  Widget _invoiceRow(String label, String value, {bool dim = false, bool isDiscount = false}) {
+    Color textColor = dim ? AppTheme.grey300 : AppTheme.grey600;
+    Color valColor = dim ? AppTheme.grey300 : AppTheme.grey700;
+    
+    if (isDiscount) {
+      textColor = AppTheme.successDark;
+      valColor = AppTheme.successDark;
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: TextStyle(fontSize: 12, color: dim ? AppTheme.grey300 : AppTheme.grey600)),
-        Text(value, style: TextStyle(fontSize: 12, color: dim ? AppTheme.grey300 : AppTheme.grey700)),
+        Text(label, style: TextStyle(fontSize: 12, color: textColor, fontWeight: isDiscount ? FontWeight.w600 : null)),
+        Text(value, style: TextStyle(fontSize: 12, color: valColor, fontWeight: isDiscount ? FontWeight.w600 : null)),
       ]),
     );
   }
 
   Widget _buildPayment() {
-    final cgst = _isInterstate ? 0.0 : _subtotal * 0.09;
-    final sgst = _isInterstate ? 0.0 : _subtotal * 0.09;
-    final igst = _isInterstate ? _subtotal * 0.18 : 0.0;
-    final total = _subtotal + cgst + sgst + igst;
+    final discountedSubtotal = max(0.0, _subtotal - _discountAmount);
+    final cgst = _isInterstate ? 0.0 : discountedSubtotal * 0.09;
+    final sgst = _isInterstate ? 0.0 : discountedSubtotal * 0.09;
+    final igst = _isInterstate ? discountedSubtotal * 0.18 : 0.0;
+    final total = discountedSubtotal + cgst + sgst + igst;
 
     if (_processing) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 32),
         child: Column(mainAxisSize: MainAxisSize.min, children: const [
-          CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Color(0xFF0D8B60))),
+          CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppTheme.primaryRed)),
           SizedBox(height: 20),
           Text('Processing secure payment...', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
           SizedBox(height: 6),
@@ -2207,19 +2444,25 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
     }
 
     return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const Icon(Icons.check_circle_outline_rounded, size: 70, color: AppTheme.success),
+      const Icon(Icons.check_circle_outline_rounded, size: 70, color: AppTheme.primaryRed),
       const SizedBox(height: 14),
-      const Center(child: Text('Payment Successful!', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: AppTheme.successDark))),
+      const Center(child: Text('Payment Successful!', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: AppTheme.primaryRed))),
       const SizedBox(height: 16),
       Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: AppTheme.successLight.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.success.withValues(alpha: 0.3))),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF5F5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.primaryRed.withValues(alpha: 0.2)),
+        ),
         child: Column(children: [
           _receiptRow('Transaction ID', _txnId, bold: true),
           const Divider(height: 14),
           ..._cart.map((item) => _receiptRow('${item.module} License', '${item.count} Batches')),
           const Divider(height: 10),
           _receiptRow('Subtotal', '₹${_subtotal.toStringAsFixed(2)}'),
+          if (_appliedCoupon != null)
+            _receiptRow('Coupon Discount ($_appliedCoupon)', '-₹${_discountAmount.toStringAsFixed(2)}'),
           if (!_isInterstate) ...[
             _receiptRow('CGST (9%)', '₹${cgst.toStringAsFixed(2)}'),
             _receiptRow('SGST (9%)', '₹${sgst.toStringAsFixed(2)}'),
@@ -2231,8 +2474,13 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
       const SizedBox(height: 20),
       ElevatedButton(
         onPressed: () => Navigator.pop(context, _cart),
-        style: ElevatedButton.styleFrom(backgroundColor: AppTheme.successDark, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-        child: const Text('Back to Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primaryRed,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        child: const Text('Success', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     ]);
   }

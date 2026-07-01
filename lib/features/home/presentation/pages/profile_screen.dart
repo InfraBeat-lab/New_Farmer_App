@@ -44,6 +44,31 @@ const List<String> _countries = [
   'Mexico',
 ];
 
+class CountryPhoneConfig {
+  final String code;
+  final int length;
+
+  const CountryPhoneConfig({required this.code, required this.length});
+}
+
+const Map<String, CountryPhoneConfig> _countryPhoneMap = {
+  'India': CountryPhoneConfig(code: '+91 ', length: 10),
+  'United States': CountryPhoneConfig(code: '+1 ', length: 10),
+  'United Kingdom': CountryPhoneConfig(code: '+44 ', length: 10),
+  'Australia': CountryPhoneConfig(code: '+61 ', length: 9),
+  'Canada': CountryPhoneConfig(code: '+1 ', length: 10),
+  'Germany': CountryPhoneConfig(code: '+49 ', length: 10),
+  'France': CountryPhoneConfig(code: '+33 ', length: 9),
+  'Japan': CountryPhoneConfig(code: '+81 ', length: 10),
+  'China': CountryPhoneConfig(code: '+86 ', length: 11),
+  'UAE': CountryPhoneConfig(code: '+971 ', length: 9),
+  'Saudi Arabia': CountryPhoneConfig(code: '+966 ', length: 9),
+  'Singapore': CountryPhoneConfig(code: '+65 ', length: 8),
+  'South Africa': CountryPhoneConfig(code: '+27 ', length: 9),
+  'Brazil': CountryPhoneConfig(code: '+55 ', length: 11),
+  'Mexico': CountryPhoneConfig(code: '+52 ', length: 10),
+};
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -126,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _farmsCtrl.text = LocalStorageService.getString('farms') ?? '';
     _shedsCtrl.text = LocalStorageService.getString('sheds') ?? '';
     _passwordCtrl.text = LocalStorageService.getString('password') ?? '';
-    _selectedRole = LocalStorageService.getString('role') ?? 'Admin';
+    _selectedRole = 'Admin';
     final savedCountry = LocalStorageService.getString('country') ?? 'India';
     if (_countries.contains(savedCountry)) {
       _selectedCountry = savedCountry;
@@ -286,17 +311,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _gridRow(Widget left, Widget right) => Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _gridRow(BuildContext context, Widget left, Widget right) {
+    final double width = MediaQuery.of(context).size.width;
+    if (width < 600) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: left),
-          const SizedBox(width: 14),
-          Expanded(child: right),
+          left,
+          const SizedBox(height: 14),
+          right,
         ],
       );
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 14),
+        Expanded(child: right),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final phoneConfig = _countryPhoneMap[_selectedCountry] ?? const CountryPhoneConfig(code: '+91 ', length: 10);
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
@@ -345,6 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // ── IDENTITY ──────────────────────────────
                     _sectionLabel('IDENTITY'),
                     _gridRow(
+                      context,
                       _field(ctrl: _farmerIdCtrl, label: 'Farmer ID', icon: Icons.vpn_key_outlined, disabled: true),
                       _field(
                         ctrl: _fullNameCtrl,
@@ -354,17 +394,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 14),
                     _gridRow(
+                      context,
                       _field(
                         ctrl: _mobileCtrl,
                         label: 'Mobile Number',
                         icon: Icons.phone_android_outlined,
                         mandatory: true,
                         keyboard: TextInputType.phone,
-                        prefixText: '+91 ',
-                        formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+                        prefixText: phoneConfig.code,
+                        formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(phoneConfig.length)],
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) return 'Mobile is required';
-                          if (v.trim().length != 10) return 'Enter 10 digits';
+                          if (v.trim().length != phoneConfig.length) return 'Enter ${phoneConfig.length} digits';
                           return null;
                         },
                       ),
@@ -383,6 +424,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 14),
                     _gridRow(
+                      context,
                       _field(
                         ctrl: _zipCtrl,
                         label: 'Zip Code',
@@ -395,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       // Role dropdown styled like a field
                       Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                         DropdownButtonFormField<String>(
-                          initialValue: _selectedRole,
+                          value: _selectedRole,
                           decoration: const InputDecoration(
                             labelText: 'Role',
                             prefixIcon: Icon(Icons.admin_panel_settings_outlined, color: AppTheme.primaryRed),
@@ -403,8 +445,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           items: const [
                             DropdownMenuItem(value: 'Admin', child: Text('Admin')),
-                            DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
-                            DropdownMenuItem(value: 'Farmer', child: Text('Farmer')),
                           ],
                           onChanged: (v) { if (v != null) setState(() => _selectedRole = v); },
                         ),
@@ -432,6 +472,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _field(ctrl: _addressCtrl, label: 'Address', icon: Icons.location_on_outlined, maxLines: 2),
                     const SizedBox(height: 14),
                     _gridRow(
+                      context,
                       // Country dropdown
                       DropdownButtonFormField<String>(
                         // ignore: deprecated_member_use
@@ -459,6 +500,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // ── FARM INFO ────────────────────────────
                     _sectionLabel('FARM DETAILS'),
                     _gridRow(
+                      context,
                       _field(
                         ctrl: _farmsCtrl,
                         label: 'Farms',

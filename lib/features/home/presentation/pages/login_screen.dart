@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:poultryos_farmer_app/core/services/local_storage_service.dart';
 import 'package:poultryos_farmer_app/core/widgets/powered_by_footer.widget.dart';
 import 'package:poultryos_farmer_app/core/services/auth_service.dart';
+import 'package:poultryos_farmer_app/core/theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -64,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final passwordVal = _passwordController.text.trim();
 
     // Default to Ramesh Patel if both are empty (for testing)
-    final email = emailVal.isEmpty ? 'ramesh.farms@gmail.com' : emailVal;
+    final email = emailVal.isEmpty ? 'sagar@logicaldna.com' : emailVal;
     final password = passwordVal.isEmpty ? 'adminpassword' : passwordVal;
 
     // Load users from Local Storage
@@ -79,16 +80,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // Always ensure Admin Ramesh is in the list
-    bool adminExists = users.any((u) => u['email'] == 'ganesh.farms@gmail.com');
+    bool adminExists = users.any((u) => u['email'] == 'sagar@logicaldna.com');
     if (!adminExists) {
       users.insert(0, {
-        'name': 'Ganesh Patel (Admin)',
+        'name': 'Sagar Godbole (Admin)',
         'mobile': '9876543210',
-        'email': 'ganesh.farms@gmail.com',
+        'email': 'sagar@logicaldna.com',
         'password': 'adminpassword',
-        'role': 'Farmer',
+        'role': 'Admin',
         'farmerId': '1',
-        'userCode': 'RP-1001',
+        'userCode': 'SG-1001',
         'isAdmin': true
       });
       await LocalStorageService.setString('users_list', jsonEncode(users));
@@ -107,15 +108,15 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Signing in as ${matchedUser['name']}...'),
-          backgroundColor: const Color(0xFF0D8B60),
+          backgroundColor: AppTheme.primaryRed,
           duration: const Duration(seconds: 1),
         ),
       );
 
       final isAdmin = matchedUser['isAdmin'] == true;
       final role = matchedUser['role'] ?? 'Farmer';
-      final code = matchedUser['userCode'] ?? 'RP-1001';
-      final name = matchedUser['name'] ?? 'Ramesh Patel';
+      final code = matchedUser['userCode'] ?? 'SG-1001';
+      final name = matchedUser['name'] ?? 'Sagar Godbole';
 
       await LocalStorageService.setString('email', email);
       await LocalStorageService.setString('role', role);
@@ -258,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const SizedBox(height: 8),
                     const Text(
-                      'Welcome back',
+                      'Welcome',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 24,
@@ -298,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               FilteringTextInputFormatter.deny(RegExp(r'\s')),
                             ],
                             decoration: InputDecoration(
-                              hintText: 'ramesh.farms@gmail.com',
+                              hintText: 'sagar@logicaldna.com',
                               prefixIcon: const Icon(Icons.alternate_email),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -366,7 +367,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: const Text(
                                 'Forgot password?',
                                 style: TextStyle(
-                                  color: Color(0xFF0D8B60),
+                                  color: AppTheme.primaryRed,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -378,7 +379,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ElevatedButton(
                             onPressed: _handleSignIn,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0D8B60),
+                              backgroundColor: AppTheme.primaryRed,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
@@ -414,33 +415,19 @@ class _LoginScreenState extends State<LoginScreen> {
                               _buildSymbolButton(
                                 assetPath: 'assets/images/gmail.png',
                                 backgroundColor: const Color(0xFFFDE8E8),
+                                onPressed:_handleGoogleSignIn,
+                              ),
+                              const SizedBox(width: 16),
+                              _buildSymbolButton(
+                                assetPath: 'assets/images/facebook.png',
+                                backgroundColor: const Color(0xFFE7F3FF),
                                 onPressed: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
-                                          'Gmail login not implemented yet'),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 16),
-                              _isGoogleLoading
-                                  ? const SizedBox(
-                                      width: 60,
-                                      height: 60,
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Color(0xFF0D8B60)),
-                                        ),
-                                      ),
-                                    )
-                                  : _buildSymbolButton(
-                                      assetPath: 'assets/images/google.png',
-                                      backgroundColor: const Color(0xFFE3F2FD),
-                                      onPressed: _handleGoogleSignIn,
-                                    ),
+                                          'Facebook login not implemented yet'),
+                                    ),);
+                              },
                             ],
                           ),
                           const SizedBox(height: 24),
@@ -633,7 +620,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
                   color: _currentCarouselIndex == index
-                      ? const Color(0xFF0D8B60)
+                      ? AppTheme.primaryRed
                       : Colors.grey[300],
                   borderRadius: BorderRadius.circular(4),
                 ),

@@ -56,11 +56,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-
-
   void _handleSignIn() async {
     FocusScope.of(context).unfocus();
-    
+
     final emailVal = _emailController.text.trim();
     final passwordVal = _passwordController.text.trim();
 
@@ -173,7 +171,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     try {
-      final result = await AuthService.signInWithGoogle(allowMockFallback: true);
+      final result =
+          await AuthService.signInWithGoogle(allowMockFallback: true);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -182,7 +181,8 @@ class _LoginScreenState extends State<LoginScreen> {
         final prefix = result.isMock ? 'Mock: ' : '';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${prefix}Signed in successfully as ${result.displayName}!'),
+            content: Text(
+                '${prefix}Signed in successfully as ${result.displayName}!'),
             backgroundColor: const Color(0xFF0D8B60),
             duration: const Duration(seconds: 2),
           ),
@@ -200,9 +200,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
         await LocalStorageService.setString('email', result.email ?? '');
         await LocalStorageService.setString('role', 'Farmer');
-        await LocalStorageService.setString('user_code', 'G-${result.email?.split('@').first ?? 'USER'}');
-        await LocalStorageService.setString('display_name', result.displayName ?? 'Google User');
-        await LocalStorageService.setString('profile_image_url', result.photoUrl ?? '');
+        await LocalStorageService.setString(
+            'user_code', 'G-${result.email?.split('@').first ?? 'USER'}');
+        await LocalStorageService.setString(
+            'display_name', result.displayName ?? 'Google User');
+        await LocalStorageService.setString(
+            'profile_image_url', result.photoUrl ?? '');
         await LocalStorageService.setInt('IsLogin', 1);
         await LocalStorageService.setString('session_id', 'google_session_id');
 
@@ -214,7 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result.errorMessage ?? 'Google authentication failed.'),
+            content:
+                Text(result.errorMessage ?? 'Google authentication failed.'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -415,7 +419,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               _buildSymbolButton(
                                 assetPath: 'assets/images/gmail.png',
                                 backgroundColor: const Color(0xFFFDE8E8),
-                                onPressed:_handleGoogleSignIn,
+                                onPressed: _handleGoogleSignIn,
                               ),
                               const SizedBox(width: 16),
                               _buildSymbolButton(
@@ -426,8 +430,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     const SnackBar(
                                       content: Text(
                                           'Facebook login not implemented yet'),
-                                    ),);
-                              },
+                                    ),
+                                  );
+                                },
+                              )
                             ],
                           ),
                           const SizedBox(height: 24),

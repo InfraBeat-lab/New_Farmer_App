@@ -44,6 +44,31 @@ const List<String> _countries = [
   'Mexico',
 ];
 
+class CountryPhoneConfig {
+  final String code;
+  final int length;
+
+  const CountryPhoneConfig({required this.code, required this.length});
+}
+
+const Map<String, CountryPhoneConfig> _countryPhoneMap = {
+  'India': CountryPhoneConfig(code: '+91 ', length: 10),
+  'United States': CountryPhoneConfig(code: '+1 ', length: 10),
+  'United Kingdom': CountryPhoneConfig(code: '+44 ', length: 10),
+  'Australia': CountryPhoneConfig(code: '+61 ', length: 9),
+  'Canada': CountryPhoneConfig(code: '+1 ', length: 10),
+  'Germany': CountryPhoneConfig(code: '+49 ', length: 10),
+  'France': CountryPhoneConfig(code: '+33 ', length: 9),
+  'Japan': CountryPhoneConfig(code: '+81 ', length: 10),
+  'China': CountryPhoneConfig(code: '+86 ', length: 11),
+  'UAE': CountryPhoneConfig(code: '+971 ', length: 9),
+  'Saudi Arabia': CountryPhoneConfig(code: '+966 ', length: 9),
+  'Singapore': CountryPhoneConfig(code: '+65 ', length: 8),
+  'South Africa': CountryPhoneConfig(code: '+27 ', length: 9),
+  'Brazil': CountryPhoneConfig(code: '+55 ', length: 11),
+  'Mexico': CountryPhoneConfig(code: '+52 ', length: 10),
+};
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -310,6 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final phoneConfig = _countryPhoneMap[_selectedCountry] ?? const CountryPhoneConfig(code: '+91 ', length: 10);
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
@@ -375,11 +401,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.phone_android_outlined,
                         mandatory: true,
                         keyboard: TextInputType.phone,
-                        prefixText: '+91 ',
-                        formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+                        prefixText: phoneConfig.code,
+                        formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(phoneConfig.length)],
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) return 'Mobile is required';
-                          if (v.trim().length != 10) return 'Enter 10 digits';
+                          if (v.trim().length != phoneConfig.length) return 'Enter ${phoneConfig.length} digits';
                           return null;
                         },
                       ),

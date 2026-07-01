@@ -145,6 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen>
   String _displayName = 'Farmer';
   bool _isAdmin = true;
   String _userCode = '';
+  String _currencySymbol = '₹';
 
   bool _recharged = false;
 
@@ -195,11 +196,14 @@ class _DashboardScreenState extends State<DashboardScreen>
     final userCode = LocalStorageService.getString('user_code') ?? 'SG-1001';
     final displayName = LocalStorageService.getString('display_name') ?? 'Sagar Godbole';
     final farmerId = LocalStorageService.getString('farmer_id') ?? '1';
+    final country = LocalStorageService.getString('country') ?? 'India';
+    final config = _countryPurchaseConfigs[country] ?? _countryPurchaseConfigs['India']!;
 
     setState(() {
       _isAdmin = (email == 'sagar@logicaldna.com');
       _userCode = userCode;
       _displayName = displayName;
+      _currencySymbol = config.symbol;
     });
 
     _loadDataFromStorage();
@@ -859,9 +863,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                       controller: birdRateCtrl,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))],
-                      decoration: const InputDecoration(
-                        labelText: 'Bird Rate (₹)',
-                        prefixIcon: Icon(Icons.currency_rupee_outlined),
+                      decoration: InputDecoration(
+                        labelText: 'Bird Rate ($_currencySymbol)',
+                        prefixIcon: const Icon(Icons.payments_outlined),
                       ),
                       validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
@@ -1445,7 +1449,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                           _batchChip(Icons.category_outlined, b.module, b.module == 'Broiler' ? Colors.orange : b.module == 'Layer' ? Colors.amber.shade700 : Colors.redAccent),
                           _batchChip(Icons.cruelty_free_outlined, b.breedName, Colors.brown),
                           _batchChip(Icons.egg_alt_outlined, '${b.chicksQuantity} Chicks', Colors.teal),
-                          _batchChip(Icons.currency_rupee_outlined, '₹${b.birdRate.toStringAsFixed(2)}/bird', Colors.green),
+                          _batchChip(Icons.payments_outlined, '$_currencySymbol${b.birdRate.toStringAsFixed(2)}/bird', Colors.green),
                           _batchChip(Icons.timer_outlined, 'Lift: ${b.stdLiftingAge}d', Colors.purple),
                           _batchChip(Icons.calendar_today_outlined, '${b.date.day}/${b.date.month}/${b.date.year}', Colors.blue),
                           _batchChip(Icons.event_outlined, 'Day 1: ${b.firstDayDate.day}/${b.firstDayDate.month}/${b.firstDayDate.year}', Colors.indigo),
@@ -1987,6 +1991,41 @@ class CartItem {
 }
 
 // -----------------------------------------------------------------------------
+// COUNTRY PURCHASE CONFIG
+// -----------------------------------------------------------------------------
+class CountryPurchaseConfig {
+  final String symbol;      // Currency symbol (e.g. '₹')
+  final double pricePerBatch; // Price per batch (e.g. 500.0)
+  final double flatDiscount;  // FLAT coupon discount (e.g. 500.0 for FREESHED)
+  final String flatDiscountText; // Text description (e.g. 'Flat ₹500 discount')
+
+  const CountryPurchaseConfig({
+    required this.symbol,
+    required this.pricePerBatch,
+    required this.flatDiscount,
+    required this.flatDiscountText,
+  });
+}
+
+const Map<String, CountryPurchaseConfig> _countryPurchaseConfigs = {
+  'India': CountryPurchaseConfig(symbol: '₹', pricePerBatch: 500.0, flatDiscount: 500.0, flatDiscountText: 'Flat ₹500 discount'),
+  'United States': CountryPurchaseConfig(symbol: '\$', pricePerBatch: 10.0, flatDiscount: 10.0, flatDiscountText: 'Flat \$10 discount'),
+  'United Kingdom': CountryPurchaseConfig(symbol: '£', pricePerBatch: 8.0, flatDiscount: 8.0, flatDiscountText: 'Flat £8 discount'),
+  'Australia': CountryPurchaseConfig(symbol: 'A\$', pricePerBatch: 15.0, flatDiscount: 15.0, flatDiscountText: 'Flat A\$15 discount'),
+  'Canada': CountryPurchaseConfig(symbol: 'C\$', pricePerBatch: 15.0, flatDiscount: 15.0, flatDiscountText: 'Flat C\$15 discount'),
+  'Germany': CountryPurchaseConfig(symbol: '€', pricePerBatch: 10.0, flatDiscount: 10.0, flatDiscountText: 'Flat €10 discount'),
+  'France': CountryPurchaseConfig(symbol: '€', pricePerBatch: 10.0, flatDiscount: 10.0, flatDiscountText: 'Flat €10 discount'),
+  'Japan': CountryPurchaseConfig(symbol: '¥', pricePerBatch: 1500.0, flatDiscount: 1500.0, flatDiscountText: 'Flat ¥1500 discount'),
+  'China': CountryPurchaseConfig(symbol: '¥', pricePerBatch: 70.0, flatDiscount: 70.0, flatDiscountText: 'Flat ¥70 discount'),
+  'UAE': CountryPurchaseConfig(symbol: 'AED ', pricePerBatch: 40.0, flatDiscount: 40.0, flatDiscountText: 'Flat AED 40 discount'),
+  'Saudi Arabia': CountryPurchaseConfig(symbol: 'SAR ', pricePerBatch: 40.0, flatDiscount: 40.0, flatDiscountText: 'Flat SAR 40 discount'),
+  'Singapore': CountryPurchaseConfig(symbol: 'S\$', pricePerBatch: 15.0, flatDiscount: 15.0, flatDiscountText: 'Flat S\$15 discount'),
+  'South Africa': CountryPurchaseConfig(symbol: 'R', pricePerBatch: 180.0, flatDiscount: 180.0, flatDiscountText: 'Flat R 180 discount'),
+  'Brazil': CountryPurchaseConfig(symbol: 'R\$', pricePerBatch: 50.0, flatDiscount: 50.0, flatDiscountText: 'Flat R\$50 discount'),
+  'Mexico': CountryPurchaseConfig(symbol: 'Mex\$', pricePerBatch: 180.0, flatDiscount: 180.0, flatDiscountText: 'Flat Mex\$180 discount'),
+};
+
+// -----------------------------------------------------------------------------
 // RECHARGE WIZARD DIALOG
 // -----------------------------------------------------------------------------
 class RechargeWizardDialog extends StatefulWidget {
@@ -2005,7 +2044,10 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
   late String _txnId;
   bool _processing = true;
   bool _isInterstate = false;
-  final double _pricePerBatch = 500.0;
+  late double _pricePerBatch;
+  late String _currencySymbol;
+  late double _flatDiscountAmount;
+  late String _flatDiscountText;
 
   String? _appliedCoupon;
   double _discountAmount = 0.0;
@@ -2018,6 +2060,13 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
     super.initState();
     final n = Random().nextInt(90000000) + 10000000;
     _txnId = 'TXN-POULTRY-$n';
+
+    final country = LocalStorageService.getString('country') ?? 'India';
+    final config = _countryPurchaseConfigs[country] ?? _countryPurchaseConfigs['India']!;
+    _pricePerBatch = config.pricePerBatch;
+    _currencySymbol = config.symbol;
+    _flatDiscountAmount = config.flatDiscount;
+    _flatDiscountText = config.flatDiscountText;
   }
 
   @override
@@ -2040,8 +2089,8 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
       discount = _subtotal * 0.1;
       successMsg = 'WELCOME10 applied! 10% discount';
     } else if (code == 'FREESHED') {
-      discount = min(500.0, _subtotal);
-      successMsg = 'FREESHED applied! Flat ₹500 discount';
+      discount = min(_flatDiscountAmount, _subtotal);
+      successMsg = 'FREESHED applied! $_flatDiscountText';
     } else if (code == 'POULTRYOS') {
       discount = _subtotal * 0.2;
       successMsg = 'POULTRYOS applied! 20% discount';
@@ -2134,7 +2183,11 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
       curve: Curves.easeInOut,
       child: Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radius16)),
-        child: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+            maxWidth: 420,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(AppTheme.spacing20),
             child: [_buildSelect(), _buildCart(), _buildInvoice(), _buildPayment()][_step],
@@ -2229,9 +2282,9 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                   title: Text('${item.module} Module', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                  subtitle: Text('${item.count} Batches @ ₹500'),
+                  subtitle: Text('${item.count} Batches @ $_currencySymbol${_pricePerBatch.toStringAsFixed(0)}'),
                   trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Text('₹${item.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text('$_currencySymbol${item.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                     IconButton(icon: const Icon(Icons.delete_outline, color: AppTheme.error, size: 18), onPressed: () => setState(() => _cart.removeAt(i))),
                   ]),
                 ),
@@ -2242,7 +2295,7 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
         const SizedBox(height: 12),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           const Text('Subtotal:', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-          Text('₹${_subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryRed)),
+          Text('$_currencySymbol${_subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryRed)),
         ]),
         const SizedBox(height: 16),
         Row(children: [
@@ -2267,134 +2320,145 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
         IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
       ]),
       const Divider(height: 12),
-      SwitchListTile(
-        title: const Text('Inter-state (IGST)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-        subtitle: const Text('IGST 18% instead of CGST+SGST 9%+9%', style: TextStyle(fontSize: 11)),
-        value: _isInterstate,
-        activeThumbColor: AppTheme.primaryRed,
-        activeTrackColor: AppTheme.primaryRed.withValues(alpha: 0.5),
-        contentPadding: EdgeInsets.zero,
-        onChanged: (v) => setState(() => _isInterstate = v),
-      ),
-      const SizedBox(height: 8),
-
-      // --- Offers & Coupons Section (Zomato/Swiggy style) ---
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: const [
-              Icon(Icons.local_offer_outlined, color: AppTheme.primaryRed, size: 16),
-              SizedBox(width: 6),
-              Text(
-                'Offers & Coupons',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.grey800),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
+      
+      Flexible(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: SizedBox(
-                  height: 42,
-                  child: TextFormField(
-                    controller: _couponCtrl,
-                    style: const TextStyle(fontSize: 13),
-                    decoration: InputDecoration(
-                      hintText: 'Enter coupon code',
-                      hintStyle: const TextStyle(fontSize: 12),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      prefixIcon: const Icon(Icons.abc, color: AppTheme.grey500),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: AppTheme.grey300), borderRadius: BorderRadius.circular(8)),
-                      focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: AppTheme.primaryRed), borderRadius: BorderRadius.circular(8)),
+              SwitchListTile(
+                title: const Text('Inter-state (IGST)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                subtitle: const Text('IGST 18% instead of CGST+SGST 9%+9%', style: TextStyle(fontSize: 11)),
+                value: _isInterstate,
+                activeThumbColor: AppTheme.primaryRed,
+                activeTrackColor: AppTheme.primaryRed.withValues(alpha: 0.5),
+                contentPadding: EdgeInsets.zero,
+                onChanged: (v) => setState(() => _isInterstate = v),
+              ),
+              const SizedBox(height: 8),
+
+              // --- Offers & Coupons Section (Zomato/Swiggy style) ---
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.local_offer_outlined, color: AppTheme.primaryRed, size: 16),
+                      SizedBox(width: 6),
+                      Text(
+                        'Offers & Coupons',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.grey800),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 42,
+                          child: TextFormField(
+                            controller: _couponCtrl,
+                            style: const TextStyle(fontSize: 13),
+                            decoration: InputDecoration(
+                              hintText: 'Enter coupon code',
+                              hintStyle: const TextStyle(fontSize: 12),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              prefixIcon: const Icon(Icons.abc, color: AppTheme.grey500),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              enabledBorder: OutlineInputBorder(borderSide: const BorderSide(color: AppTheme.grey300), borderRadius: BorderRadius.circular(8)),
+                              focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: AppTheme.primaryRed), borderRadius: BorderRadius.circular(8)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        height: 42,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_appliedCoupon != null) {
+                              _removeCoupon();
+                            } else {
+                              if (_couponCtrl.text.isNotEmpty) {
+                                  _applyCoupon(_couponCtrl.text);
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _appliedCoupon != null ? Colors.grey[700] : AppTheme.primaryRed,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: Text(_appliedCoupon != null ? 'Remove' : 'Apply', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_couponError != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _couponError!,
+                      style: const TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                  if (_couponSuccess != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _couponSuccess!,
+                      style: const TextStyle(color: AppTheme.successDark, fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  // Horizontal coupon list
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        _buildCouponCard('FARMER50', '50% OFF', 'Save 50% on all licenses'),
+                        _buildCouponCard('FREESHED', '$_currencySymbol${_flatDiscountAmount.toStringAsFixed(0)} OFF', _flatDiscountText),
+                        _buildCouponCard('POULTRYOS', '20% OFF', 'Flat 20% discount on total cost'),
+                        _buildCouponCard('WELCOME10', '10% OFF', 'Flat 10% discount for first recharge'),
+                      ],
                     ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(width: 10),
-              SizedBox(
-                height: 42,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_appliedCoupon != null) {
-                      _removeCoupon();
-                    } else {
-                      if (_couponCtrl.text.isNotEmpty) {
-                        _applyCoupon(_couponCtrl.text);
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _appliedCoupon != null ? Colors.grey[700] : AppTheme.primaryRed,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: Text(_appliedCoupon != null ? 'Remove' : 'Apply', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                ),
+              const SizedBox(height: 14),
+
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: const Color(0xFFF9F9F9), borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.grey200)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Text('Price Details', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.grey500, fontSize: 11, letterSpacing: 0.5)),
+                  const SizedBox(height: 10),
+                  ..._cart.map((item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Text('${item.module} (${item.count} Batches)', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                      Text('$_currencySymbol${item.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 13)),
+                    ]),
+                  )),
+                  const Divider(height: 14),
+                  _invoiceRow('Subtotal', '$_currencySymbol${_subtotal.toStringAsFixed(2)}'),
+                  if (_appliedCoupon != null)
+                    _invoiceRow('Coupon Discount ($_appliedCoupon)', '-$_currencySymbol${_discountAmount.toStringAsFixed(2)}', isDiscount: true),
+                  _invoiceRow('CGST (9%)', '$_currencySymbol${cgst.toStringAsFixed(2)}', dim: _isInterstate),
+                  _invoiceRow('SGST (9%)', '$_currencySymbol${sgst.toStringAsFixed(2)}', dim: _isInterstate),
+                  _invoiceRow('IGST (18%)', '$_currencySymbol${igst.toStringAsFixed(2)}', dim: !_isInterstate),
+                  const Divider(height: 14),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text('$_currencySymbol${total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primaryRed)),
+                  ]),
+                ]),
               ),
             ],
           ),
-          if (_couponError != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _couponError!,
-              style: const TextStyle(color: AppTheme.error, fontSize: 11, fontWeight: FontWeight.w600),
-            ),
-          ],
-          if (_couponSuccess != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              _couponSuccess!,
-              style: const TextStyle(color: AppTheme.successDark, fontSize: 11, fontWeight: FontWeight.w600),
-            ),
-          ],
-          const SizedBox(height: 8),
-          // Horizontal coupon list
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                _buildCouponCard('FARMER50', '50% OFF', 'Save 50% on all licenses'),
-                _buildCouponCard('FREESHED', '₹500 OFF', 'Flat ₹500 discount'),
-                _buildCouponCard('POULTRYOS', '20% OFF', 'Flat 20% discount on total cost'),
-                _buildCouponCard('WELCOME10', '10% OFF', 'Flat 10% discount for first recharge'),
-              ],
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 14),
-
-      Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: const Color(0xFFF9F9F9), borderRadius: BorderRadius.circular(10), border: Border.all(color: AppTheme.grey200)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Price Details', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.grey500, fontSize: 11, letterSpacing: 0.5)),
-          const SizedBox(height: 10),
-          ..._cart.map((item) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('${item.module} (${item.count} Batches)', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
-              Text('₹${item.subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 13)),
-            ]),
-          )),
-          const Divider(height: 14),
-          _invoiceRow('Subtotal', '₹${_subtotal.toStringAsFixed(2)}'),
-          if (_appliedCoupon != null)
-            _invoiceRow('Coupon Discount ($_appliedCoupon)', '-₹${_discountAmount.toStringAsFixed(2)}', isDiscount: true),
-          _invoiceRow('CGST (9%)', '₹${cgst.toStringAsFixed(2)}', dim: _isInterstate),
-          _invoiceRow('SGST (9%)', '₹${sgst.toStringAsFixed(2)}', dim: _isInterstate),
-          _invoiceRow('IGST (18%)', '₹${igst.toStringAsFixed(2)}', dim: !_isInterstate),
-          const Divider(height: 14),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-            Text('₹${total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primaryRed)),
-          ]),
-        ]),
+        ),
       ),
       const SizedBox(height: 16),
       Row(children: [
@@ -2460,15 +2524,15 @@ class _RechargeWizardDialogState extends State<RechargeWizardDialog> {
           const Divider(height: 14),
           ..._cart.map((item) => _receiptRow('${item.module} License', '${item.count} Batches')),
           const Divider(height: 10),
-          _receiptRow('Subtotal', '₹${_subtotal.toStringAsFixed(2)}'),
+          _receiptRow('Subtotal', '$_currencySymbol${_subtotal.toStringAsFixed(2)}'),
           if (_appliedCoupon != null)
-            _receiptRow('Coupon Discount ($_appliedCoupon)', '-₹${_discountAmount.toStringAsFixed(2)}'),
+            _receiptRow('Coupon Discount ($_appliedCoupon)', '-$_currencySymbol${_discountAmount.toStringAsFixed(2)}'),
           if (!_isInterstate) ...[
-            _receiptRow('CGST (9%)', '₹${cgst.toStringAsFixed(2)}'),
-            _receiptRow('SGST (9%)', '₹${sgst.toStringAsFixed(2)}'),
-          ] else _receiptRow('IGST (18%)', '₹${igst.toStringAsFixed(2)}'),
+            _receiptRow('CGST (9%)', '$_currencySymbol${cgst.toStringAsFixed(2)}'),
+            _receiptRow('SGST (9%)', '$_currencySymbol${sgst.toStringAsFixed(2)}'),
+          ] else _receiptRow('IGST (18%)', '$_currencySymbol${igst.toStringAsFixed(2)}'),
           const Divider(height: 10),
-          _receiptRow('Total Paid', '₹${total.toStringAsFixed(2)}', bold: true),
+          _receiptRow('Total Paid', '$_currencySymbol${total.toStringAsFixed(2)}', bold: true),
         ]),
       ),
       const SizedBox(height: 20),

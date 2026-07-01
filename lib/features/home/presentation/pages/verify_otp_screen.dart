@@ -99,7 +99,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
             TextButton(
               onPressed: () async {
                 const url =
-                    'https://play.google.com/store/apps/details?id=com.poultryos.farmerapp';
+                    'https://play.google.com/store/apps/details?id=com.poultryos.layerapp';
                 if (await canLaunchUrl(Uri.parse(url))) {
                   await launchUrl(Uri.parse(url),
                       mode: LaunchMode.externalApplication);

@@ -1,4 +1,4 @@
-package com.poultryos.farmerapp
+package com.poultryos.layerapp
 
 import io.flutter.embedding.android.FlutterActivity
 

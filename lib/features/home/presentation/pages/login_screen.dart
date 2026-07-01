@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:poultryos_farmer_app/core/services/local_storage_service.dart';
 import 'package:poultryos_farmer_app/core/widgets/powered_by_footer.widget.dart';
+import 'package:poultryos_farmer_app/core/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late PageController _carouselController;
   int _currentCarouselIndex = 0;
   Timer? _autoScrollTimer;
+  bool _isGoogleLoading = false;
 
   @override
   void initState() {
@@ -77,12 +79,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // Always ensure Admin Ramesh is in the list
-    bool adminExists = users.any((u) => u['email'] == 'ramesh.farms@gmail.com');
+    bool adminExists = users.any((u) => u['email'] == 'ganesh.farms@gmail.com');
     if (!adminExists) {
       users.insert(0, {
-        'name': 'Ramesh Patel (Admin)',
+        'name': 'Ganesh Patel (Admin)',
         'mobile': '9876543210',
-        'email': 'ramesh.farms@gmail.com',
+        'email': 'ganesh.farms@gmail.com',
         'password': 'adminpassword',
         'role': 'Farmer',
         'farmerId': '1',
@@ -138,6 +140,102 @@ class _LoginScreenState extends State<LoginScreen> {
           duration: Duration(seconds: 2),
         ),
       );
+    }
+  }
+
+  void _handleGoogleSignIn() async {
+    if (_isGoogleLoading) return;
+
+    setState(() {
+      _isGoogleLoading = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(width: 16),
+            Text('Connecting to Google...'),
+          ],
+        ),
+        backgroundColor: Color(0xFF0D8B60),
+        duration: Duration(seconds: 10),
+      ),
+    );
+
+    try {
+      final result = await AuthService.signInWithGoogle(allowMockFallback: true);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      if (result.success) {
+        final prefix = result.isMock ? 'Mock: ' : '';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${prefix}Signed in successfully as ${result.displayName}!'),
+            backgroundColor: const Color(0xFF0D8B60),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        if (result.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.errorMessage!),
+              backgroundColor: Colors.orange[800],
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+
+        await LocalStorageService.setString('email', result.email ?? '');
+        await LocalStorageService.setString('role', 'Farmer');
+        await LocalStorageService.setString('user_code', 'G-${result.email?.split('@').first ?? 'USER'}');
+        await LocalStorageService.setString('display_name', result.displayName ?? 'Google User');
+        await LocalStorageService.setString('profile_image_url', result.photoUrl ?? '');
+        await LocalStorageService.setInt('IsLogin', 1);
+        await LocalStorageService.setString('session_id', 'google_session_id');
+
+        Future.delayed(const Duration(milliseconds: 600), () {
+          if (mounted) {
+            context.go('/');
+          }
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.errorMessage ?? 'Google authentication failed.'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
+        });
+      }
     }
   }
 
@@ -326,18 +424,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 },
                               ),
                               const SizedBox(width: 16),
-                              _buildSymbolButton(
-                                assetPath: 'assets/images/google.png',
-                                backgroundColor: const Color(0xFFE3F2FD),
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Google login not implemented yet'),
+                              _isGoogleLoading
+                                  ? const SizedBox(
+                                      width: 60,
+                                      height: 60,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Color(0xFF0D8B60)),
+                                        ),
+                                      ),
+                                    )
+                                  : _buildSymbolButton(
+                                      assetPath: 'assets/images/google.png',
+                                      backgroundColor: const Color(0xFFE3F2FD),
+                                      onPressed: _handleGoogleSignIn,
                                     ),
-                                  );
-                                },
-                              ),
                             ],
                           ),
                           const SizedBox(height: 24),

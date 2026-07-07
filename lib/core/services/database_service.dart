@@ -53,72 +53,156 @@ class DatabaseService {
   static Future<void> _initializeDatabase(Connection conn) async {
     try {
       debugPrint('Initializing PostgreSQL tables...');
+
       await conn.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-          id SERIAL PRIMARY KEY,
-          email VARCHAR(255) UNIQUE NOT NULL,
-          name VARCHAR(255),
-          photo_url TEXT,
-          role VARCHAR(50) DEFAULT 'Farmer',
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        CREATE SCHEMA IF NOT EXISTS auth;
+        ''');
+
+      await conn.execute('''
+        CREATE TABLE IF NOT EXISTS auth.users (
+            id SERIAL PRIMARY KEY,
+            user_code VARCHAR(20) NOT NULL UNIQUE DEFAULT ('USR' || nextval('auth.users_id_seq')),
+            user_name VARCHAR(100) NOT NULL,
+            farmer_id INTEGER,
+            mobile_number VARCHAR(20) UNIQUE,
+            email_address VARCHAR(100) UNIQUE,
+            password_hash VARCHAR(255),
+            role_id INTEGER DEFAULT 1,
+            device_id VARCHAR(100),
+            fcm_token VARCHAR(255),
+            otp_code VARCHAR(10),
+            otp_expires_at TIMESTAMP,
+            last_login_at TIMESTAMP,
+            login_attempts INTEGER NOT NULL DEFAULT 0,
+            is_active BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            google_uid VARCHAR(100),
+            photo_url TEXT,
+            auth_provider VARCHAR(20) DEFAULT 'LOCAL',
+
+            CONSTRAINT fk_users_farmer
+                FOREIGN KEY (farmer_id)
+                REFERENCES auth.farmers(id)
+                ON UPDATE CASCADE
+                ON DELETE RESTRICT,
+
+            CONSTRAINT fk_users_role
+                FOREIGN KEY (role_id)
+                REFERENCES auth.roles(id)
+                ON UPDATE CASCADE
+                ON DELETE RESTRICT
         );
-      ''');
-      debugPrint('PostgreSQL users table is ready.');
+        ''');
+
+      debugPrint('auth.users table is ready.');
     } catch (e) {
-      debugPrint('Error creating users table in PostgreSQL: $e');
+      debugPrint('Error creating auth.users table: $e');
     }
   }
 
   /// Inserts a new user or updates their last login time on successful sign-in.
   static Future<void> insertOrUpdateUser({
-    required String email,
     required String name,
-    required String photoUrl,
-    String role = 'Farmer',
+    String? email,
+    int? farmerId,
+    String? mobileNumber,
+    String? passwordHash,
+    int roleId = 1,
+    String? deviceId,
+    String? fcmToken,
+    String? googleUid,
+    String? photoUrl,
+    String authProvider = 'LOCAL',
   }) async {
     try {
       final conn = await getConnection();
 
-      // Check if user already exists
-      final checkResult = await conn.execute(
-        Sql.named('SELECT id FROM users WHERE email = :email'),
-        parameters: {'email': email},
+      final check = await conn.execute(
+        Sql.named('''
+        SELECT id
+FROM auth.users
+WHERE email_address = :email
+   OR google_uid = :googleUid
+      '''),
+        parameters: {
+          'email': email,
+        },
       );
 
-      if (checkResult.isEmpty) {
-        // User not found, insert new user
-        debugPrint('Inserting new user: $email into PostgreSQL');
+      if (check.isEmpty) {
         await conn.execute(
           Sql.named('''
-            INSERT INTO users (email, name, photo_url, role, created_at, last_login)
-            VALUES (:email, :name, :photoUrl, :role, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-          '''),
+          INSERT INTO auth.users (
+            user_code,
+            user_name,
+            farmer_id,
+            mobile_number,
+            email_address,
+            password_hash,
+            role_id,
+            device_id,
+            fcm_token,
+            created_at,
+            updated_at,
+            last_login_at
+          )
+          VALUES (
+            :userCode,
+            :userName,
+            :farmerId,
+            :mobileNumber,
+            :email,
+            :passwordHash,
+            :roleId,
+            :deviceId,
+            :fcmToken,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+          )
+        '''),
           parameters: {
+            'userName': name,
+            'farmerId': farmerId,
+            'mobileNumber': mobileNumber,
             'email': email,
-            'name': name,
+            'passwordHash': passwordHash,
+            'roleId': roleId,
+            'deviceId': deviceId,
+            'fcmToken': fcmToken,
+            'googleUid': googleUid,
             'photoUrl': photoUrl,
-            'role': role,
+            'authProvider': authProvider,
           },
         );
       } else {
-        // User found, update last login and profile info
-        debugPrint('User exists. Updating last login for: $email');
         await conn.execute(
           Sql.named('''
-            UPDATE users
-            SET last_login = CURRENT_TIMESTAMP, name = :name, photo_url = :photoUrl
-            WHERE email = :email
-          '''),
+          UPDATE auth.users
+SET
+    user_name = :userName,
+    farmer_id = :farmerId,
+    mobile_number = :mobileNumber,
+    device_id = :deviceId,
+    fcm_token = :fcmToken,
+    google_uid = :googleUid,
+    photo_url = :photoUrl,
+    auth_provider = :authProvider,
+    last_login_at = CURRENT_TIMESTAMP,
+    updated_at = CURRENT_TIMESTAMP
+WHERE email_address = :email
+        '''),
           parameters: {
+            'userName': name,
+            'deviceId': deviceId,
+            'fcmToken': fcmToken,
             'email': email,
-            'name': name,
-            'photoUrl': photoUrl,
           },
         );
       }
     } catch (e) {
-      debugPrint('Error inserting/updating user in PostgreSQL: $e');
+      debugPrint('Error inserting/updating user: $e');
       rethrow;
     }
   }

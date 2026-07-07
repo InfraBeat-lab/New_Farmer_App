@@ -81,21 +81,25 @@ class _SplashScreenState extends State<SplashScreen>
       }
       return;
     }
-
     debugPrint('✅ APIs are up, checking login status');
     final isLogin = LocalStorageService.getInt('IsLogin') ?? 0;
-    final sessionId = LocalStorageService.getString('session_id');
 
-    debugPrint('👤 IsLogin: $isLogin, SessionId: $sessionId');
+    debugPrint('👤 IsLogin: $isLogin');
 
     if (!mounted) {
       debugPrint('⚠️ Widget not mounted before navigation, returning');
       return;
     }
 
-    if (isLogin == 1 && sessionId != null && sessionId.isNotEmpty) {
-      debugPrint('🏠 Going to home screen');
-      context.go('/');
+    if (isLogin == 1) {
+      final isProfileCompleted = LocalStorageService.getBool('profile_completed') ?? false;
+      if (isProfileCompleted) {
+        debugPrint('🏠 Going to home screen');
+        context.go('/');
+      } else {
+        debugPrint('👤 Incomplete profile, going to profile setup screen');
+        context.go('/profile');
+      }
     } else {
       debugPrint('🔑 Going to login screen');
       await LocalStorageService.remove('IsLogin');

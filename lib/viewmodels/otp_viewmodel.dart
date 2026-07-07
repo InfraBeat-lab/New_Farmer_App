@@ -431,6 +431,7 @@ final verifyOtpProvider = NotifierProvider<VerifyOtpNotifier, VerifyOtpState>(
 Future<void> signOut() async {
   await LocalStorageService.remove('IsLogin');
   await LocalStorageService.remove('session_id');
+  await LocalStorageService.remove('access_token');
   await LocalStorageService.remove('UserMobile');
   await LocalStorageService.remove('mobile_number');
   await LocalStorageService.remove('IMEI');
@@ -452,4 +453,24 @@ Future<void> signOut() async {
   await LocalStorageService.remove('doctorName');
   await LocalStorageService.remove('managementID');
   await LocalStorageService.remove('managementName');
+  
+  await LocalStorageService.remove('email');
+  await LocalStorageService.remove('mobile');
+  await LocalStorageService.remove('role');
+  await LocalStorageService.remove('user_code');
+  await LocalStorageService.remove('display_name');
+  await LocalStorageService.remove('full_name');
+  await LocalStorageService.remove('farmer_id');
+  await LocalStorageService.remove('profile_completed');
+  await LocalStorageService.remove('farm_name');
+  await LocalStorageService.remove('address');
+  await LocalStorageService.remove('city');
+  await LocalStorageService.remove('pin_code');
+  await LocalStorageService.remove('gst');
+  await LocalStorageService.remove('pan');
+  await LocalStorageService.remove('currency_code');
+  await LocalStorageService.remove('language');
+  await LocalStorageService.remove('timezone');
+  await LocalStorageService.remove('country_id');
+  await LocalStorageService.remove('country');
 }

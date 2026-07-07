@@ -93,7 +93,8 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
               'A new version of the app is available. Please update to continue.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+              onPressed: () =>
+                  Navigator.pushReplacementNamed(context, '/login'),
               child: const Text('Cancel'),
             ),
             TextButton(
@@ -157,7 +158,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
                     width: MediaQuery.of(context).size.width * 0.7,
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
-                        'assets/images/KKCK_logo.png',
+                        'assets/images/logo_short.png',
                         width: MediaQuery.of(context).size.width * 0.5,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(

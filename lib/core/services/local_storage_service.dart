@@ -17,7 +17,9 @@ class LocalStorageService {
 
   /// Retrieves a string value.
   static String? getString(String key) {
-    return _box.get(key) as String?;
+    final val = _box.get(key);
+    if (val == null) return null;
+    return val.toString();
   }
 
   /// Saves a boolean value.
@@ -27,7 +29,16 @@ class LocalStorageService {
 
   /// Retrieves a boolean value.
   static bool? getBool(String key) {
-    return _box.get(key) as bool?;
+    final val = _box.get(key);
+    if (val == null) return null;
+    if (val is bool) return val;
+    if (val is String) {
+      return val.toLowerCase() == 'true' || val == '1';
+    }
+    if (val is int) {
+      return val == 1;
+    }
+    return null;
   }
 
   /// Saves an integer value.
@@ -37,7 +48,11 @@ class LocalStorageService {
 
   /// Retrieves an integer value.
   static int? getInt(String key) {
-    return _box.get(key) as int?;
+    final val = _box.get(key);
+    if (val == null) return null;
+    if (val is int) return val;
+    if (val is String) return int.tryParse(val);
+    return null;
   }
 
   /// Removes a value by key.

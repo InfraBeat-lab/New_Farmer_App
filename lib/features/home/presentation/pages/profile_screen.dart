@@ -1,73 +1,12 @@
-import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:poultryos_farmer_app/core/services/farm_settings_api_service.dart';
+import 'package:poultryos_farmer_app/core/services/farmer_api_service.dart';
 import 'package:poultryos_farmer_app/core/services/local_storage_service.dart';
 import 'package:poultryos_farmer_app/core/theme/app_theme.dart';
 import 'package:poultryos_farmer_app/core/widgets/powered_by_footer.widget.dart';
 
-// Country → Currency map
-const Map<String, String> _countryCurrencyMap = {
-  'India': '₹ INR',
-  'United States': '\$ USD',
-  'United Kingdom': '£ GBP',
-  'Australia': 'A\$ AUD',
-  'Canada': 'C\$ CAD',
-  'Germany': '€ EUR',
-  'France': '€ EUR',
-  'Japan': '¥ JPY',
-  'China': '¥ CNY',
-  'UAE': 'AED',
-  'Saudi Arabia': 'SAR',
-  'Singapore': 'S\$ SGD',
-  'South Africa': 'R ZAR',
-  'Brazil': 'R\$ BRL',
-  'Mexico': 'Mex\$ MXN',
-};
-
-const List<String> _countries = [
-  'India',
-  'United States',
-  'United Kingdom',
-  'Australia',
-  'Canada',
-  'Germany',
-  'France',
-  'Japan',
-  'China',
-  'UAE',
-  'Saudi Arabia',
-  'Singapore',
-  'South Africa',
-  'Brazil',
-  'Mexico',
-];
-
-class CountryPhoneConfig {
-  final String code;
-  final int length;
-
-  const CountryPhoneConfig({required this.code, required this.length});
-}
-
-const Map<String, CountryPhoneConfig> _countryPhoneMap = {
-  'India': CountryPhoneConfig(code: '+91 ', length: 10),
-  'United States': CountryPhoneConfig(code: '+1 ', length: 10),
-  'United Kingdom': CountryPhoneConfig(code: '+44 ', length: 10),
-  'Australia': CountryPhoneConfig(code: '+61 ', length: 9),
-  'Canada': CountryPhoneConfig(code: '+1 ', length: 10),
-  'Germany': CountryPhoneConfig(code: '+49 ', length: 10),
-  'France': CountryPhoneConfig(code: '+33 ', length: 9),
-  'Japan': CountryPhoneConfig(code: '+81 ', length: 10),
-  'China': CountryPhoneConfig(code: '+86 ', length: 11),
-  'UAE': CountryPhoneConfig(code: '+971 ', length: 9),
-  'Saudi Arabia': CountryPhoneConfig(code: '+966 ', length: 9),
-  'Singapore': CountryPhoneConfig(code: '+65 ', length: 8),
-  'South Africa': CountryPhoneConfig(code: '+27 ', length: 9),
-  'Brazil': CountryPhoneConfig(code: '+55 ', length: 11),
-  'Mexico': CountryPhoneConfig(code: '+52 ', length: 10),
-};
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -79,188 +18,214 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
-  final _farmerIdCtrl = TextEditingController();
-  final _fullNameCtrl = TextEditingController();
+  bool _isLoading = false;
+
+  final _userCodeCtrl = TextEditingController();
+  final _userNameCtrl = TextEditingController();
+  final _farmerNameCtrl = TextEditingController();
+
   final _mobileCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _zipCtrl = TextEditingController();
-  final _addressCtrl = TextEditingController();
-  final _stateCtrl = TextEditingController();
-  final _farmsCtrl = TextEditingController();
-  final _shedsCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _deviceIdCtrl = TextEditingController();
-  final _currencyCtrl = TextEditingController(text: '₹ INR');
 
-  String _selectedCountry = 'India';
-  String _selectedRole = 'Admin';
-  bool _obscurePassword = true;
+  final _addressCtrl = TextEditingController();
+  final _cityCtrl = TextEditingController();
+  final _pincodeCtrl = TextEditingController();
+  final _gstCtrl = TextEditingController();
+  final _panCtrl = TextEditingController();
+
+  final _currencyCodeCtrl = TextEditingController(text: 'INR');
+  final _timezoneCtrl = TextEditingController(text: 'Asia/Kolkata');
+  final _languageCtrl = TextEditingController(text: 'en');
+
+  final List<Map<String, dynamic>> _countriesList = [
+    {'id': 1, 'name': 'India', 'currency': 'INR', 'timezone': 'Asia/Kolkata'},
+    {'id': 2, 'name': 'United States', 'currency': 'USD', 'timezone': 'America/New_York'},
+    {'id': 3, 'name': 'United Kingdom', 'currency': 'GBP', 'timezone': 'Europe/London'},
+    {'id': 4, 'name': 'Australia', 'currency': 'AUD', 'timezone': 'Australia/Sydney'},
+    {'id': 5, 'name': 'Canada', 'currency': 'CAD', 'timezone': 'America/Toronto'},
+    {'id': 6, 'name': 'Germany', 'currency': 'EUR', 'timezone': 'Europe/Berlin'},
+    {'id': 7, 'name': 'France', 'currency': 'EUR', 'timezone': 'Europe/Paris'},
+    {'id': 8, 'name': 'Japan', 'currency': 'JPY', 'timezone': 'Asia/Tokyo'},
+    {'id': 9, 'name': 'China', 'currency': 'CNY', 'timezone': 'Asia/Shanghai'},
+    {'id': 10, 'name': 'UAE', 'currency': 'AED', 'timezone': 'Asia/Dubai'},
+    {'id': 11, 'name': 'Saudi Arabia', 'currency': 'SAR', 'timezone': 'Asia/Riyadh'},
+    {'id': 12, 'name': 'Singapore', 'currency': 'SGD', 'timezone': 'Asia/Singapore'},
+    {'id': 13, 'name': 'South Africa', 'currency': 'ZAR', 'timezone': 'Africa/Johannesburg'},
+    {'id': 14, 'name': 'Brazil', 'currency': 'BRL', 'timezone': 'America/Sao_Paulo'},
+    {'id': 15, 'name': 'Mexico', 'currency': 'MXN', 'timezone': 'America/Mexico_City'},
+  ];
+
+  int? _selectedCountryId;
 
   @override
   void initState() {
     super.initState();
-    _generateFarmerId();
-    _generateDeviceId();
     _loadSavedValues();
   }
 
-  void _generateFarmerId() {
-    final existingId = LocalStorageService.getString('farmer_id');
-    if (existingId != null && existingId.isNotEmpty) {
-      _farmerIdCtrl.text = existingId;
-    } else {
-      final rnd = Random().nextInt(90000) + 10000;
-      _farmerIdCtrl.text = 'FRM-$rnd';
-    }
-  }
-
-  void _generateDeviceId() {
-    final existingDevice = LocalStorageService.getString('device_id');
-    if (existingDevice != null && existingDevice.isNotEmpty) {
-      _deviceIdCtrl.text = existingDevice;
-    } else {
-      // Use kIsWeb + defaultTargetPlatform (works on all platforms including web)
-      String platform;
-      if (kIsWeb) {
-        platform = 'WEB';
-      } else {
-        switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
-            platform = 'AND';
-            break;
-          case TargetPlatform.iOS:
-            platform = 'IOS';
-            break;
-          default:
-            platform = 'OTH';
+  void _loadSavedValues() {
+    _userCodeCtrl.text = LocalStorageService.getString('user_code') ?? '';
+    _userNameCtrl.text = LocalStorageService.getString('full_name') ?? LocalStorageService.getString('display_name') ?? '';
+    _farmerNameCtrl.text = LocalStorageService.getString('farm_name') ?? '';
+    _mobileCtrl.text = LocalStorageService.getString('mobile') ?? '';
+    _emailCtrl.text = LocalStorageService.getString('email') ?? '';
+    _addressCtrl.text = LocalStorageService.getString('address') ?? '';
+    _cityCtrl.text = LocalStorageService.getString('city') ?? '';
+    _pincodeCtrl.text = LocalStorageService.getString('pin_code') ?? '';
+    _gstCtrl.text = LocalStorageService.getString('gst') ?? '';
+    _panCtrl.text = LocalStorageService.getString('pan') ?? '';
+    
+    _currencyCodeCtrl.text = LocalStorageService.getString('currency_code') ?? 'INR';
+    _timezoneCtrl.text = LocalStorageService.getString('timezone') ?? 'Asia/Kolkata';
+    _languageCtrl.text = LocalStorageService.getString('language') ?? 'en';
+    
+    _selectedCountryId = LocalStorageService.getInt('country_id');
+    if (_selectedCountryId == null) {
+      final savedCountry = LocalStorageService.getString('country');
+      if (savedCountry != null) {
+        final match = _countriesList.firstWhere(
+          (c) => (c['name'] as String).toLowerCase() == savedCountry.toLowerCase(),
+          orElse: () => {},
+        );
+        if (match.isNotEmpty) {
+          _selectedCountryId = match['id'] as int;
         }
       }
-      final rnd = Random().nextInt(900000000) + 100000000;
-      _deviceIdCtrl.text = '$platform-$rnd';
     }
-  }
-
-  void _loadSavedValues() {
-    _zipCtrl.text = LocalStorageService.getString('zip_code') ?? '';
-    _mobileCtrl.text = LocalStorageService.getString('mobile_number') ?? '';
-    _emailCtrl.text = LocalStorageService.getString('email') ?? '';
-    _fullNameCtrl.text = LocalStorageService.getString('full_name') ?? '';
-    _addressCtrl.text = LocalStorageService.getString('address') ?? '';
-    _stateCtrl.text = LocalStorageService.getString('state') ?? '';
-    _farmsCtrl.text = LocalStorageService.getString('farms') ?? '';
-    _shedsCtrl.text = LocalStorageService.getString('sheds') ?? '';
-    _passwordCtrl.text = LocalStorageService.getString('password') ?? '';
-    _selectedRole = 'Admin';
-    final savedCountry = LocalStorageService.getString('country') ?? 'India';
-    if (_countries.contains(savedCountry)) {
-      _selectedCountry = savedCountry;
-      _currencyCtrl.text = _countryCurrencyMap[savedCountry] ?? '₹ INR';
-    }
-  }
-
-  void _onCountryChanged(String? country) {
-    if (country == null) return;
-    setState(() {
-      _selectedCountry = country;
-      _currencyCtrl.text = _countryCurrencyMap[country] ?? '-';
-    });
+    _selectedCountryId ??= 1;
   }
 
   void _skipProfile() async {
-    if (_formKey.currentState!.validate()) {
-      FocusScope.of(context).unfocus();
+    FocusScope.of(context).unfocus();
+    await LocalStorageService.setBool('profile_completed', true);
 
-      await LocalStorageService.setString('farmer_id', _farmerIdCtrl.text.trim());
-      await LocalStorageService.setString('full_name', _fullNameCtrl.text.trim());
-      await LocalStorageService.setString('mobile_number', _mobileCtrl.text.trim());
-      await LocalStorageService.setString('email', _emailCtrl.text.trim());
-      await LocalStorageService.setString('zip_code', _zipCtrl.text.trim());
-      await LocalStorageService.setString('address', _addressCtrl.text.trim());
-      await LocalStorageService.setString('country', _selectedCountry);
-      await LocalStorageService.setString('currency', _currencyCtrl.text.trim());
-      await LocalStorageService.setString('state', _stateCtrl.text.trim());
-      await LocalStorageService.setString('farms', _farmsCtrl.text.trim());
-      await LocalStorageService.setString('sheds', _shedsCtrl.text.trim());
-      await LocalStorageService.setString('password', _passwordCtrl.text.trim());
-      await LocalStorageService.setString('role', _selectedRole);
-      await LocalStorageService.setString('device_id', _deviceIdCtrl.text.trim());
-      await LocalStorageService.setString('session_id', 'dummy_session_id');
-      await LocalStorageService.setInt('IsLogin', 1);
-
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Profile setup skipped.'),
+        backgroundColor: AppTheme.success,
+        duration: Duration(seconds: 1),
+      ),
+    );
+    Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Optional fields skipped. Profile saved!'),
-          backgroundColor: AppTheme.success,
-          duration: Duration(seconds: 1),
-        ),
-      );
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (!mounted) return;
-        context.go('/');
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill mandatory fields before skipping.'),
-          backgroundColor: AppTheme.primaryRed,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+      context.go('/');
+    });
   }
 
   void _saveProfile() async {
-    if (_formKey.currentState!.validate()) {
-      FocusScope.of(context).unfocus();
+    if (!_formKey.currentState!.validate()) return;
 
-      await LocalStorageService.setString('farmer_id', _farmerIdCtrl.text.trim());
-      await LocalStorageService.setString('full_name', _fullNameCtrl.text.trim());
-      await LocalStorageService.setString('mobile_number', _mobileCtrl.text.trim());
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+    FocusScope.of(context).unfocus();
+
+    try {
+      // 1. CREATE FARMER
+      final farmerResponse = await FarmerApiService.createFarmer(
+        farmerName: _farmerNameCtrl.text.trim(),
+        mobile: _mobileCtrl.text.trim(),
+        email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
+        address:
+            _addressCtrl.text.trim().isEmpty ? null : _addressCtrl.text.trim(),
+        countryId: _selectedCountryId,
+        city: _cityCtrl.text.trim().isEmpty ? null : _cityCtrl.text.trim(),
+        pincode:
+            _pincodeCtrl.text.trim().isEmpty ? null : _pincodeCtrl.text.trim(),
+        gstNumber: _gstCtrl.text.trim().isEmpty ? null : _gstCtrl.text.trim(),
+        panNumber: _panCtrl.text.trim().isEmpty ? null : _panCtrl.text.trim(),
+      );
+
+      if (farmerResponse['success'] != true) {
+        throw Exception(farmerResponse['message'] ?? 'Failed to create farmer');
+      }
+
+      final farmerId = farmerResponse['data']['id'];
+
+      // 2. CREATE SETTINGS
+      final settingsResponse = await FarmSettingsApiService.createSettings(
+        farmerId: farmerId,
+        currencyCode: _currencyCodeCtrl.text.trim(),
+        languageCode: _languageCtrl.text.trim(),
+        timezone: _timezoneCtrl.text.trim(),
+      );
+
+      if (settingsResponse['success'] != true) {
+        throw Exception(
+            settingsResponse['message'] ?? 'Failed to save settings');
+      }
+
+      // 3. SAVE LOCALLY
+      await LocalStorageService.setInt('farmer_id', farmerId);
+      await LocalStorageService.setBool('profile_completed', true);
+
+      // Cache all values locally
+      await LocalStorageService.setString('full_name', _userNameCtrl.text.trim());
+      await LocalStorageService.setString('display_name', _userNameCtrl.text.trim());
+      await LocalStorageService.setString('farm_name', _farmerNameCtrl.text.trim());
+      await LocalStorageService.setString('mobile', _mobileCtrl.text.trim());
       await LocalStorageService.setString('email', _emailCtrl.text.trim());
-      await LocalStorageService.setString('zip_code', _zipCtrl.text.trim());
       await LocalStorageService.setString('address', _addressCtrl.text.trim());
-      await LocalStorageService.setString('country', _selectedCountry);
-      await LocalStorageService.setString('currency', _currencyCtrl.text.trim());
-      await LocalStorageService.setString('state', _stateCtrl.text.trim());
-      await LocalStorageService.setString('farms', _farmsCtrl.text.trim());
-      await LocalStorageService.setString('sheds', _shedsCtrl.text.trim());
-      await LocalStorageService.setString('password', _passwordCtrl.text.trim());
-      await LocalStorageService.setString('role', _selectedRole);
-      await LocalStorageService.setString('device_id', _deviceIdCtrl.text.trim());
-      await LocalStorageService.setString('session_id', 'dummy_session_id');
-      await LocalStorageService.setInt('IsLogin', 1);
+      await LocalStorageService.setString('city', _cityCtrl.text.trim());
+      await LocalStorageService.setString('pin_code', _pincodeCtrl.text.trim());
+      await LocalStorageService.setString('gst', _gstCtrl.text.trim());
+      await LocalStorageService.setString('pan', _panCtrl.text.trim());
+      await LocalStorageService.setString('currency_code', _currencyCodeCtrl.text.trim());
+      await LocalStorageService.setString('language', _languageCtrl.text.trim());
+      await LocalStorageService.setString('timezone', _timezoneCtrl.text.trim());
+      if (_selectedCountryId != null) {
+        await LocalStorageService.setInt('country_id', _selectedCountryId!);
+        final countryMatch = _countriesList.firstWhere(
+          (c) => c['id'] == _selectedCountryId,
+          orElse: () => {},
+        );
+        if (countryMatch.isNotEmpty) {
+          await LocalStorageService.setString('country', countryMatch['name'] as String);
+        }
+      }
 
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profile saved successfully!'),
           backgroundColor: AppTheme.success,
-          duration: Duration(seconds: 1),
         ),
       );
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (!mounted) return;
-        context.go('/');
-      });
+
+      context.go('/');
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: AppTheme.primaryRed,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   @override
   void dispose() {
-    _farmerIdCtrl.dispose();
-    _fullNameCtrl.dispose();
+    _userCodeCtrl.dispose();
+    _userNameCtrl.dispose();
+    _farmerNameCtrl.dispose();
     _mobileCtrl.dispose();
     _emailCtrl.dispose();
-    _zipCtrl.dispose();
     _addressCtrl.dispose();
-    _stateCtrl.dispose();
-    _farmsCtrl.dispose();
-    _shedsCtrl.dispose();
-    _passwordCtrl.dispose();
-    _deviceIdCtrl.dispose();
-    _currencyCtrl.dispose();
+    _cityCtrl.dispose();
+    _pincodeCtrl.dispose();
+    _gstCtrl.dispose();
+    _panCtrl.dispose();
+    _currencyCodeCtrl.dispose();
+    _timezoneCtrl.dispose();
+    _languageCtrl.dispose();
     super.dispose();
   }
 
@@ -268,9 +233,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _sectionLabel(String title) => Padding(
         padding: const EdgeInsets.only(bottom: 12, top: 4),
         child: Row(children: [
-          Container(width: 3, height: 16, decoration: BoxDecoration(color: AppTheme.primaryRed, borderRadius: BorderRadius.circular(2))),
+          Container(
+              width: 3,
+              height: 16,
+              decoration: BoxDecoration(
+                  color: AppTheme.primaryRed,
+                  borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 8),
-          Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.grey600, letterSpacing: 0.5)),
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.grey600,
+                  letterSpacing: 0.5)),
         ]),
       );
 
@@ -297,7 +272,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       maxLines: maxLines,
       decoration: InputDecoration(
         labelText: mandatory ? '$label *' : label,
-        prefixIcon: Icon(icon, color: disabled ? AppTheme.grey400 : AppTheme.primaryRed),
+        prefixIcon: Icon(icon,
+            color: disabled ? AppTheme.grey400 : AppTheme.primaryRed),
         prefixText: prefixText,
         suffixIcon: suffixIcon,
         filled: disabled,
@@ -305,67 +281,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
         labelStyle: TextStyle(color: disabled ? AppTheme.grey400 : null),
       ),
       style: TextStyle(color: disabled ? AppTheme.grey500 : null),
-      validator: validator ?? (mandatory
-          ? (v) => v == null || v.trim().isEmpty ? '$label is required' : null
-          : null),
-    );
-  }
-
-  Widget _gridRow(BuildContext context, Widget left, Widget right) {
-    final double width = MediaQuery.of(context).size.width;
-    if (width < 600) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          left,
-          const SizedBox(height: 14),
-          right,
-        ],
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: left),
-        const SizedBox(width: 14),
-        Expanded(child: right),
-      ],
+      validator: validator ??
+          (mandatory
+              ? (v) =>
+                  v == null || v.trim().isEmpty ? '$label is required' : null
+              : null),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final phoneConfig = _countryPhoneMap[_selectedCountry] ?? const CountryPhoneConfig(code: '+91 ', length: 10);
+    final bool isCompleted = LocalStorageService.getBool('profile_completed') == true;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.pop(),
+              )
+            : null,
         actions: [
-          TextButton.icon(
-            onPressed: _skipProfile,
-            icon: const Icon(Icons.skip_next_outlined, color: Colors.white),
-            label: const Text('Skip', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-          ),
+          if (!isCompleted)
+            TextButton.icon(
+              onPressed: _skipProfile,
+              icon: const Icon(Icons.skip_next_outlined, color: Colors.white),
+              label: const Text('Skip',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16)),
+            ),
           const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppTheme.spacing20),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             // Header card
             Container(
               padding: const EdgeInsets.all(AppTheme.spacing20),
               decoration: BoxDecoration(
                 gradient: AppTheme.primaryGradient,
                 borderRadius: BorderRadius.circular(AppTheme.radius16),
-                boxShadow: [BoxShadow(color: AppTheme.primaryRed.withValues(alpha: 0.25), blurRadius: 12, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: AppTheme.primaryRed.withValues(alpha: 0.25),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4))
+                ],
               ),
               child: const Column(children: [
-                Icon(Icons.account_circle_outlined, size: 60, color: Colors.white),
+                Icon(Icons.account_circle_outlined,
+                    size: 60, color: Colors.white),
                 SizedBox(height: 10),
-                Text('Setup Your Farm Profile', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text('Setup Your Farm Profile',
+                    style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
                 SizedBox(height: 4),
-                Text('Fields marked * are mandatory', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Color(0xFFFDE8E8))),
+                Text('Fields marked * are mandatory',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Color(0xFFFDE8E8))),
               ]),
             ),
             const SizedBox(height: 20),
@@ -374,173 +355,199 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Card(
               elevation: 2,
               shadowColor: Colors.black12,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radius16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radius16)),
               child: Padding(
                 padding: const EdgeInsets.all(AppTheme.spacing20),
                 child: Form(
                   key: _formKey,
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // ── IDENTITY ──────────────────────────────
+                        _sectionLabel('USER ACCOUNT'),
 
-                    // ── IDENTITY ──────────────────────────────
-                    _sectionLabel('IDENTITY'),
-                    _gridRow(
-                      context,
-                      _field(ctrl: _farmerIdCtrl, label: 'Farmer ID', icon: Icons.vpn_key_outlined, disabled: true),
-                      _field(
-                        ctrl: _fullNameCtrl,
-                        label: 'Full Name',
-                        icon: Icons.person_outline,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _gridRow(
-                      context,
-                      _field(
-                        ctrl: _mobileCtrl,
-                        label: 'Mobile Number',
-                        icon: Icons.phone_android_outlined,
-                        mandatory: true,
-                        keyboard: TextInputType.phone,
-                        prefixText: phoneConfig.code,
-                        formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(phoneConfig.length)],
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Mobile is required';
-                          if (v.trim().length != phoneConfig.length) return 'Enter ${phoneConfig.length} digits';
-                          return null;
-                        },
-                      ),
-                      _field(
-                        ctrl: _emailCtrl,
-                        label: 'Email',
-                        icon: Icons.mail_outline,
-                        mandatory: true,
-                        keyboard: TextInputType.emailAddress,
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Email is required';
-                          if (!RegExp(r"^[\w-.]+@([\w-]+\.)+[\w-]{2,4}").hasMatch(v.trim())) return 'Invalid email';
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _gridRow(
-                      context,
-                      _field(
-                        ctrl: _zipCtrl,
-                        label: 'Zip Code',
-                        icon: Icons.pin_drop_outlined,
-                        mandatory: true,
-                        keyboard: TextInputType.number,
-                        formatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
-                        validator: (v) => v == null || v.trim().isEmpty ? 'Zip code is required' : null,
-                      ),
-                      // Role dropdown styled like a field
-                      Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                        DropdownButtonFormField<String>(
-                          value: _selectedRole,
-                          decoration: const InputDecoration(
-                            labelText: 'Role',
-                            prefixIcon: Icon(Icons.admin_panel_settings_outlined, color: AppTheme.primaryRed),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          ),
-                          items: const [
-                            DropdownMenuItem(value: 'Admin', child: Text('Admin')),
+                        _field(
+                          ctrl: _userCodeCtrl,
+                          label: 'User Code',
+                          icon: Icons.vpn_key_outlined,
+                          disabled: true,
+                        ),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                          ctrl: _userNameCtrl,
+                          label: 'Full Name',
+                          icon: Icons.person_outline,
+                          mandatory: true,
+                        ),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                          ctrl: _mobileCtrl,
+                          label: 'Mobile Number',
+                          icon: Icons.phone_android_outlined,
+                          mandatory: true,
+                          keyboard: TextInputType.phone,
+                          formatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10)
                           ],
-                          onChanged: (v) { if (v != null) setState(() => _selectedRole = v); },
+                          validator: (v) {
+                            final val = v ?? '';
+                            if (val.trim().isEmpty) return 'Mobile Number is required';
+                            if (!RegExp(r'^\d{10}$').hasMatch(val.trim())) {
+                              return 'Enter a valid 10-digit number';
+                            }
+                            return null;
+                          },
                         ),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                          ctrl: _emailCtrl,
+                          label: 'Email Address',
+                          icon: Icons.mail_outline,
+                          mandatory: false,
+                          validator: (v) {
+                            final val = v ?? '';
+                            if (val.trim().isEmpty) return null; // Optional
+                            if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(val.trim())) {
+                              return 'Enter a valid email';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        _sectionLabel('FARMER PROFILE'),
+
+                        _field(
+                            ctrl: _farmerNameCtrl,
+                            label: 'Farm Name',
+                            icon: Icons.agriculture,
+                            mandatory: true),
+
+                        SizedBox(height: 8),
+
+                        DropdownButtonFormField<int>(
+                          value: _selectedCountryId,
+                          decoration: const InputDecoration(
+                            labelText: 'Country *',
+                            prefixIcon: Icon(Icons.public, color: AppTheme.primaryRed),
+                          ),
+                          items: _countriesList.map((c) {
+                            return DropdownMenuItem<int>(
+                              value: c['id'] as int,
+                              child: Text(c['name'] as String),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedCountryId = val;
+                                final countryData = _countriesList.firstWhere((c) => c['id'] == val);
+                                _currencyCodeCtrl.text = countryData['currency'] as String;
+                                _timezoneCtrl.text = countryData['timezone'] as String;
+                              });
+                            }
+                          },
+                          validator: (v) => v == null ? 'Country is required' : null,
+                        ),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                            ctrl: _addressCtrl,
+                            label: 'Address',
+                            icon: Icons.location_on),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                            ctrl: _cityCtrl,
+                            label: 'City',
+                            icon: Icons.location_city),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                            ctrl: _pincodeCtrl,
+                            label: 'Pincode',
+                            icon: Icons.pin_drop),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                            ctrl: _gstCtrl,
+                            label: 'GST Number',
+                            icon: Icons.receipt),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                            ctrl: _panCtrl,
+                            label: 'PAN Number',
+                            icon: Icons.badge),
+
+                        const SizedBox(height: 28),
+
+                        _sectionLabel('FARM SETTINGS'),
+
+                        _field(
+                            ctrl: _currencyCodeCtrl,
+                            label: 'Currency',
+                            icon: Icons.currency_exchange),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                            ctrl: _languageCtrl,
+                            label: 'Language',
+                            icon: Icons.language),
+
+                        SizedBox(height: 8),
+
+                        _field(
+                            ctrl: _timezoneCtrl,
+                            label: 'Timezone',
+                            icon: Icons.schedule),
+
+                        const SizedBox(height: 28),
+
+                        // Save button
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : _saveProfile,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryRed,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppTheme.radius12),
+                            ),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'Save & Continue',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                        )
                       ]),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Password (full width)
-                    StatefulBuilder(
-                      builder: (ctx, setSt) => _field(
-                        ctrl: _passwordCtrl,
-                        label: 'Password',
-                        icon: Icons.lock_outline,
-                        obscure: _obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppTheme.grey500),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-
-                    // ── LOCATION ─────────────────────────────
-                    _sectionLabel('LOCATION'),
-                    _field(ctrl: _addressCtrl, label: 'Address', icon: Icons.location_on_outlined, maxLines: 2),
-                    const SizedBox(height: 14),
-                    _gridRow(
-                      context,
-                      // Country dropdown
-                      DropdownButtonFormField<String>(
-                        // ignore: deprecated_member_use
-                        value: _selectedCountry,
-                        decoration: const InputDecoration(
-                          labelText: 'Country *',
-                          prefixIcon: Icon(Icons.public_outlined, color: AppTheme.primaryRed),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        items: _countries.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                        onChanged: _onCountryChanged,
-                        validator: (v) => v == null ? 'Country is required' : null,
-                      ),
-                      _field(
-                        ctrl: _currencyCtrl,
-                        label: 'Currency',
-                        icon: Icons.currency_exchange_outlined,
-                        disabled: true,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _field(ctrl: _stateCtrl, label: 'State', icon: Icons.map_outlined),
-                    const SizedBox(height: 22),
-
-                    // ── FARM INFO ────────────────────────────
-                    _sectionLabel('FARM DETAILS'),
-                    _gridRow(
-                      context,
-                      _field(
-                        ctrl: _farmsCtrl,
-                        label: 'Farms',
-                        icon: Icons.agriculture_outlined,
-                        keyboard: TextInputType.number,
-                        formatters: [FilteringTextInputFormatter.digitsOnly],
-                      ),
-                      _field(
-                        ctrl: _shedsCtrl,
-                        label: 'Sheds',
-                        icon: Icons.home_work_outlined,
-                        keyboard: TextInputType.number,
-                        formatters: [FilteringTextInputFormatter.digitsOnly],
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-
-                    // ── DEVICE ───────────────────────────────
-                    _sectionLabel('DEVICE'),
-                    _field(
-                      ctrl: _deviceIdCtrl,
-                      label: 'Device ID',
-                      icon: Icons.smartphone_outlined,
-                      disabled: true,
-                    ),
-                    const SizedBox(height: 28),
-
-                    // Save button
-                    ElevatedButton(
-                      onPressed: _saveProfile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryRed,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radius12)),
-                        elevation: 2,
-                      ),
-                      child: const Text('Save & Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    ),
-                  ]),
                 ),
               ),
             ),

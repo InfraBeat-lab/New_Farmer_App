@@ -79,7 +79,7 @@ class AuthService {
           email: email,
           name: displayName,
           photoUrl: photoUrl,
-          role: 'Farmer',
+          googleUid: account.id,
         );
         dbSuccess = true;
       } catch (e) {
@@ -115,7 +115,7 @@ class AuthService {
             email: mockEmail,
             name: mockName,
             photoUrl: mockPhoto,
-            role: 'Farmer',
+            googleUid: 'mock-google-id',
           );
           dbSuccess = true;
         } catch (e) {

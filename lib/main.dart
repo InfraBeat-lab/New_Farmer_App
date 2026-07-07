@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:poultryos_farmer_app/core/services/local_storage_service.dart';
 import 'package:poultryos_farmer_app/core/theme/app_theme.dart';
-import 'package:poultryos_farmer_app/features/home/presentation/pages/login_screen.dart';
+import 'package:poultryos_farmer_app/features/home/presentation/pages/signin_screen.dart';
+import 'package:poultryos_farmer_app/features/home/presentation/pages/signup_screen.dart';
 import 'package:poultryos_farmer_app/features/home/presentation/pages/splash_screen.dart';
 import 'package:poultryos_farmer_app/features/home/presentation/pages/verify_otp_screen.dart';
 import 'package:poultryos_farmer_app/features/home/presentation/pages/profile_screen.dart';
@@ -25,7 +26,7 @@ class PoultryOSFarmerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'PoultryOS Farmer App',
+      title: 'PoultryOS Farm Manager',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme(),
       routerConfig: _router,
@@ -42,7 +43,11 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => const SigninScreen(),
+    ),
+    GoRoute(
+      path: '/signup',
+      builder: (context, state) => const SignupScreen(),
     ),
     GoRoute(
       path: '/verify-otp',

@@ -10,6 +10,10 @@ import 'package:poultryos_farmer_app/features/home/presentation/pages/splash_scr
 import 'package:poultryos_farmer_app/features/home/presentation/pages/verify_otp_screen.dart';
 import 'package:poultryos_farmer_app/features/home/presentation/pages/profile_screen.dart';
 import 'package:poultryos_farmer_app/features/home/presentation/pages/dashboard_screen.dart';
+import 'package:poultryos_farmer_app/features/recharge/models/recharge_models.dart';
+import 'package:poultryos_farmer_app/features/recharge/screens/recharge_screen.dart';
+import 'package:poultryos_farmer_app/features/recharge/screens/checkout_screen.dart';
+import 'package:poultryos_farmer_app/features/recharge/screens/payment_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,6 +67,47 @@ final _router = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const DashboardScreen(),
+    ),
+    GoRoute(
+      path: '/recharge',
+      builder: (context, state) => const RechargeScreen(),
+    ),
+    GoRoute(
+      path: '/recharge/checkout',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        final rawCart = extra['cart'] as List<dynamic>? ?? [];
+        final cart = rawCart.whereType<CartItem>().toList();
+        return CheckoutScreen(
+          cart: cart,
+          currencySymbol: extra['currencySymbol'] as String? ?? '₹',
+          flatDiscountAmount:
+              (extra['flatDiscountAmount'] as num?)?.toDouble() ?? 500.0,
+          flatDiscountText:
+              extra['flatDiscountText'] as String? ?? 'Flat ₹500 discount',
+        );
+      },
+    ),
+    GoRoute(
+      path: '/recharge/payment',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        final rawCart = extra['cart'] as List<dynamic>? ?? [];
+        final cart = rawCart.whereType<CartItem>().toList();
+        return PaymentScreen(
+          orderId: extra['orderId'] as String? ?? '',
+          paymentSessionId: extra['paymentSessionId'] as String? ?? '',
+          isProduction: extra['isProduction'] as bool? ?? false,
+          total: (extra['total'] as num?)?.toDouble() ?? 0.0,
+          currencySymbol: extra['currencySymbol'] as String? ?? '₹',
+          cart: cart,
+          appliedCoupon: extra['appliedCoupon'] as String?,
+          discountAmount: (extra['discountAmount'] as num?)?.toDouble() ?? 0.0,
+          isInterstate: extra['isInterstate'] as bool? ?? false,
+          farmerName: extra['farmerName'] as String? ?? 'Farmer',
+          farmName: extra['farmName'] as String? ?? 'My Farm',
+        );
+      },
     ),
   ],
 );

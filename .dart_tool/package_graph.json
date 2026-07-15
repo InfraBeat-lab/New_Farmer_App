@@ -12,6 +12,7 @@
         "device_info_plus",
         "dio",
         "flutter",
+        "flutter_cashfree_pg_sdk",
         "flutter_dotenv",
         "flutter_localizations",
         "flutter_riverpod",
@@ -141,6 +142,17 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_cashfree_pg_sdk",
+      "version": "2.4.0+52",
+      "dependencies": [
+        "flutter",
+        "flutter_web_plugins",
+        "http",
+        "js",
+        "plugin_platform_interface"
       ]
     },
     {
@@ -762,6 +774,20 @@
       ]
     },
     {
+      "name": "js",
+      "version": "0.6.7",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
       "name": "path_provider",
       "version": "2.1.6",
       "dependencies": [
@@ -1161,13 +1187,6 @@
         "jni",
         "jni_flutter",
         "path_provider_platform_interface"
-      ]
-    },
-    {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
-      "dependencies": [
-        "meta"
       ]
     },
     {

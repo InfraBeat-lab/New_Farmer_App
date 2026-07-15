@@ -7,7 +7,6 @@ import 'package:poultryos_farmer_app/core/services/local_storage_service.dart';
 import 'package:poultryos_farmer_app/core/theme/app_theme.dart';
 import 'package:poultryos_farmer_app/core/widgets/powered_by_footer.widget.dart';
 
-
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -39,20 +38,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final List<Map<String, dynamic>> _countriesList = [
     {'id': 1, 'name': 'India', 'currency': 'INR', 'timezone': 'Asia/Kolkata'},
-    {'id': 2, 'name': 'United States', 'currency': 'USD', 'timezone': 'America/New_York'},
-    {'id': 3, 'name': 'United Kingdom', 'currency': 'GBP', 'timezone': 'Europe/London'},
-    {'id': 4, 'name': 'Australia', 'currency': 'AUD', 'timezone': 'Australia/Sydney'},
-    {'id': 5, 'name': 'Canada', 'currency': 'CAD', 'timezone': 'America/Toronto'},
-    {'id': 6, 'name': 'Germany', 'currency': 'EUR', 'timezone': 'Europe/Berlin'},
+    {
+      'id': 2,
+      'name': 'United States',
+      'currency': 'USD',
+      'timezone': 'America/New_York'
+    },
+    {
+      'id': 3,
+      'name': 'United Kingdom',
+      'currency': 'GBP',
+      'timezone': 'Europe/London'
+    },
+    {
+      'id': 4,
+      'name': 'Australia',
+      'currency': 'AUD',
+      'timezone': 'Australia/Sydney'
+    },
+    {
+      'id': 5,
+      'name': 'Canada',
+      'currency': 'CAD',
+      'timezone': 'America/Toronto'
+    },
+    {
+      'id': 6,
+      'name': 'Germany',
+      'currency': 'EUR',
+      'timezone': 'Europe/Berlin'
+    },
     {'id': 7, 'name': 'France', 'currency': 'EUR', 'timezone': 'Europe/Paris'},
     {'id': 8, 'name': 'Japan', 'currency': 'JPY', 'timezone': 'Asia/Tokyo'},
     {'id': 9, 'name': 'China', 'currency': 'CNY', 'timezone': 'Asia/Shanghai'},
     {'id': 10, 'name': 'UAE', 'currency': 'AED', 'timezone': 'Asia/Dubai'},
-    {'id': 11, 'name': 'Saudi Arabia', 'currency': 'SAR', 'timezone': 'Asia/Riyadh'},
-    {'id': 12, 'name': 'Singapore', 'currency': 'SGD', 'timezone': 'Asia/Singapore'},
-    {'id': 13, 'name': 'South Africa', 'currency': 'ZAR', 'timezone': 'Africa/Johannesburg'},
-    {'id': 14, 'name': 'Brazil', 'currency': 'BRL', 'timezone': 'America/Sao_Paulo'},
-    {'id': 15, 'name': 'Mexico', 'currency': 'MXN', 'timezone': 'America/Mexico_City'},
+    {
+      'id': 11,
+      'name': 'Saudi Arabia',
+      'currency': 'SAR',
+      'timezone': 'Asia/Riyadh'
+    },
+    {
+      'id': 12,
+      'name': 'Singapore',
+      'currency': 'SGD',
+      'timezone': 'Asia/Singapore'
+    },
+    {
+      'id': 13,
+      'name': 'South Africa',
+      'currency': 'ZAR',
+      'timezone': 'Africa/Johannesburg'
+    },
+    {
+      'id': 14,
+      'name': 'Brazil',
+      'currency': 'BRL',
+      'timezone': 'America/Sao_Paulo'
+    },
+    {
+      'id': 15,
+      'name': 'Mexico',
+      'currency': 'MXN',
+      'timezone': 'America/Mexico_City'
+    },
   ];
 
   int? _selectedCountryId;
@@ -65,7 +114,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _loadSavedValues() {
     _userCodeCtrl.text = LocalStorageService.getString('user_code') ?? '';
-    _userNameCtrl.text = LocalStorageService.getString('full_name') ?? LocalStorageService.getString('display_name') ?? '';
+    _userNameCtrl.text = LocalStorageService.getString('full_name') ??
+        LocalStorageService.getString('display_name') ??
+        '';
     _farmerNameCtrl.text = LocalStorageService.getString('farm_name') ?? '';
     _mobileCtrl.text = LocalStorageService.getString('mobile') ?? '';
     _emailCtrl.text = LocalStorageService.getString('email') ?? '';
@@ -74,17 +125,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _pincodeCtrl.text = LocalStorageService.getString('pin_code') ?? '';
     _gstCtrl.text = LocalStorageService.getString('gst') ?? '';
     _panCtrl.text = LocalStorageService.getString('pan') ?? '';
-    
-    _currencyCodeCtrl.text = LocalStorageService.getString('currency_code') ?? 'INR';
-    _timezoneCtrl.text = LocalStorageService.getString('timezone') ?? 'Asia/Kolkata';
+
+    _currencyCodeCtrl.text =
+        LocalStorageService.getString('currency_code') ?? 'INR';
+    _timezoneCtrl.text =
+        LocalStorageService.getString('timezone') ?? 'Asia/Kolkata';
     _languageCtrl.text = LocalStorageService.getString('language') ?? 'en';
-    
+
     _selectedCountryId = LocalStorageService.getInt('country_id');
     if (_selectedCountryId == null) {
       final savedCountry = LocalStorageService.getString('country');
       if (savedCountry != null) {
         final match = _countriesList.firstWhere(
-          (c) => (c['name'] as String).toLowerCase() == savedCountry.toLowerCase(),
+          (c) =>
+              (c['name'] as String).toLowerCase() == savedCountry.toLowerCase(),
           orElse: () => {},
         );
         if (match.isNotEmpty) {
@@ -109,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
     Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
-      context.go('/');
+      context.go('/recharge');
     });
   }
 
@@ -161,9 +215,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await LocalStorageService.setBool('profile_completed', true);
 
       // Cache all values locally
-      await LocalStorageService.setString('full_name', _userNameCtrl.text.trim());
-      await LocalStorageService.setString('display_name', _userNameCtrl.text.trim());
-      await LocalStorageService.setString('farm_name', _farmerNameCtrl.text.trim());
+      await LocalStorageService.setString(
+          'full_name', _userNameCtrl.text.trim());
+      await LocalStorageService.setString(
+          'display_name', _userNameCtrl.text.trim());
+      await LocalStorageService.setString(
+          'farm_name', _farmerNameCtrl.text.trim());
       await LocalStorageService.setString('mobile', _mobileCtrl.text.trim());
       await LocalStorageService.setString('email', _emailCtrl.text.trim());
       await LocalStorageService.setString('address', _addressCtrl.text.trim());
@@ -171,9 +228,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await LocalStorageService.setString('pin_code', _pincodeCtrl.text.trim());
       await LocalStorageService.setString('gst', _gstCtrl.text.trim());
       await LocalStorageService.setString('pan', _panCtrl.text.trim());
-      await LocalStorageService.setString('currency_code', _currencyCodeCtrl.text.trim());
-      await LocalStorageService.setString('language', _languageCtrl.text.trim());
-      await LocalStorageService.setString('timezone', _timezoneCtrl.text.trim());
+      await LocalStorageService.setString(
+          'currency_code', _currencyCodeCtrl.text.trim());
+      await LocalStorageService.setString(
+          'language', _languageCtrl.text.trim());
+      await LocalStorageService.setString(
+          'timezone', _timezoneCtrl.text.trim());
       if (_selectedCountryId != null) {
         await LocalStorageService.setInt('country_id', _selectedCountryId!);
         final countryMatch = _countriesList.firstWhere(
@@ -181,7 +241,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           orElse: () => {},
         );
         if (countryMatch.isNotEmpty) {
-          await LocalStorageService.setString('country', countryMatch['name'] as String);
+          await LocalStorageService.setString(
+              'country', countryMatch['name'] as String);
         }
       }
 
@@ -194,7 +255,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       );
 
-      context.go('/');
+      context.go('/recharge');
     } catch (e) {
       if (!mounted) return;
 
@@ -291,7 +352,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCompleted = LocalStorageService.getBool('profile_completed') == true;
+    final bool isCompleted =
+        LocalStorageService.getBool('profile_completed') == true;
 
     return Scaffold(
       appBar: AppBar(
@@ -397,7 +459,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                           validator: (v) {
                             final val = v ?? '';
-                            if (val.trim().isEmpty) return 'Mobile Number is required';
+                            if (val.trim().isEmpty)
+                              return 'Mobile Number is required';
                             if (!RegExp(r'^\d{10}$').hasMatch(val.trim())) {
                               return 'Enter a valid 10-digit number';
                             }
@@ -415,7 +478,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           validator: (v) {
                             final val = v ?? '';
                             if (val.trim().isEmpty) return null; // Optional
-                            if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(val.trim())) {
+                            if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                                .hasMatch(val.trim())) {
                               return 'Enter a valid email';
                             }
                             return null;
@@ -438,7 +502,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           value: _selectedCountryId,
                           decoration: const InputDecoration(
                             labelText: 'Country *',
-                            prefixIcon: Icon(Icons.public, color: AppTheme.primaryRed),
+                            prefixIcon:
+                                Icon(Icons.public, color: AppTheme.primaryRed),
                           ),
                           items: _countriesList.map((c) {
                             return DropdownMenuItem<int>(
@@ -450,13 +515,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             if (val != null) {
                               setState(() {
                                 _selectedCountryId = val;
-                                final countryData = _countriesList.firstWhere((c) => c['id'] == val);
-                                _currencyCodeCtrl.text = countryData['currency'] as String;
-                                _timezoneCtrl.text = countryData['timezone'] as String;
+                                final countryData = _countriesList
+                                    .firstWhere((c) => c['id'] == val);
+                                _currencyCodeCtrl.text =
+                                    countryData['currency'] as String;
+                                _timezoneCtrl.text =
+                                    countryData['timezone'] as String;
                               });
                             }
                           },
-                          validator: (v) => v == null ? 'Country is required' : null,
+                          validator: (v) =>
+                              v == null ? 'Country is required' : null,
                         ),
 
                         SizedBox(height: 8),

@@ -66,8 +66,7 @@ class _SigninScreenState extends State<SigninScreen> {
           'email', (user['email_address'] ?? '') as String);
       await LocalStorageService.setString(
           'mobile', (user['mobile_number'] ?? '') as String);
-      await LocalStorageService.setString(
-          'role', (user['role_id'] ?? '1') as String);
+      await LocalStorageService.setInt('role', (user['role_id'] ?? 1));
       await LocalStorageService.setString(
           'user_code', (user['user_code'] ?? '') as String);
       await LocalStorageService.setString(
@@ -98,7 +97,7 @@ class _SigninScreenState extends State<SigninScreen> {
       Future.delayed(const Duration(milliseconds: 500), () {
         if (!mounted) return;
         if (isProfileCompleted) {
-          context.go('/');
+          context.go('/recharge');
         } else {
           context.go('/profile');
         }

@@ -236,6 +236,12 @@
       "languageVersion": "3.10"
     },
     {
+      "name": "flutter_cashfree_pg_sdk",
+      "rootUri": "file:///C:/Users/kamlakar.yadav/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_cashfree_pg_sdk-2.4.0+52",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "flutter_dotenv",
       "rootUri": "file:///C:/Users/kamlakar.yadav/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_dotenv-6.0.1",
       "packageUri": "lib/",
@@ -414,6 +420,12 @@
       "rootUri": "file:///C:/Users/kamlakar.yadav/AppData/Local/Pub/Cache/hosted/pub.dev/jni_flutter-1.0.1",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "js",
+      "rootUri": "file:///C:/Users/kamlakar.yadav/AppData/Local/Pub/Cache/hosted/pub.dev/js-0.6.7",
+      "packageUri": "lib/",
+      "languageVersion": "2.19"
     },
     {
       "name": "json_annotation",
